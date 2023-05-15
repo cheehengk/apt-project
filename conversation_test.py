@@ -2,9 +2,8 @@ from langchain.llms import OpenAI
 from langchain.chains import ConversationChain
 from langchain.memory import ConversationBufferMemory
 
-
 conversation = ConversationChain(
-    llm=OpenAI(temperature=0), # deterministic temperature
+    llm=OpenAI(temperature=0),  # deterministic temperature
     verbose=False,
     memory=ConversationBufferMemory()
 )
