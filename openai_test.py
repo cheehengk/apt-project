@@ -1,6 +1,6 @@
 import openai
 
-openai.api_key = "API KEY"
+openai.api_key = "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"
 
 
 def prompt_reply(input_prompt):
