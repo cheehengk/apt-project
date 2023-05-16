@@ -5,7 +5,8 @@ from langchain.memory import ConversationBufferMemory
 conversation = ConversationChain(
     llm=OpenAI(temperature=0),  # deterministic temperature
     verbose=False,
-    memory=ConversationBufferMemory()
+    memory=ConversationBufferMemory(),
+
 )
 
 prompt = input("Enter starting prompt: ")
