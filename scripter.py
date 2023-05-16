@@ -1,7 +1,9 @@
-from PyPDF2 import PdfReader
+import time
 import openai
+from PyPDF2 import PdfReader
 
 openai.api_key = "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"
+
 
 def extract_pdf(path):
     pdfReader = PdfReader(path)
@@ -16,8 +18,14 @@ def extract_pdf(path):
     return text_data, num_pages
 
 
-def get_openai_summary(text_data):
-    prompt = "Summarise this piece of text to 50% of its original length. " + text_data
+def generate_video_script(text_data, page, pages):
+    if page == 0:
+        prompt = "Give me a short video transcript: " + text_data
+    elif page == pages:
+        prompt = "Give me a short video transcript: " + text_data
+    else:
+        prompt = "Give me a short video transcript: " + text_data
+
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
         messages=[
@@ -33,8 +41,10 @@ def get_openai_summary(text_data):
 # Main Program Here
 file_path = "testdoc.pdf"
 text, num_pages = extract_pdf(file_path)
+script = []
 
 for i in range(num_pages):
     print("Page ", i + 1)
-    page_summary = get_openai_summary(text[i])
-    print(page_summary)
+    script.append(generate_video_script(text[i], i, num_pages))
+    print(script[i])
+    # time.sleep(3)  # 3 seconds delay to cool down API calls
