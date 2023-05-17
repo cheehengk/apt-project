@@ -9,43 +9,40 @@ from langchain.docstore.document import Document
 from langchain.prompts import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from langchain import OpenAI, PromptTemplate, LLMChain
+from create_video import merge_image_audio, generate_paths, concat_videos
+
 os.environ['OPENAI_API_KEY'] = "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"
 pixabay_api_key = "36447779-8e6272c9ff054351cb18d32ff"
+
 
 def load_pdf_file(filepath):
     loader = PyPDFLoader(filepath)
     pages = loader.load_and_split()
     return pages
 
+
 def custom_prompt(docs):
     # print(docs)
     # docs = [Document(page_content=t) for t in docs]
 
-    prompt_template = """Summarise in 20 words:
-    {text}
-
-
-    CONCISE SUMMARY IN ENGLISH:"""
+    prompt_template = """Give a short video transcript based on:
+    {text}"""
     PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
     chain = load_summarize_chain(OpenAI(temperature=0), chain_type="stuff", prompt=PROMPT)
     return chain.run(docs)
 
 
 def extract_pdf(path):
-    with open(path) as f:
-        pdf_docu = f.read()
-    
-    text_splitter = RecursiveCharacterTextSplitter(
-        chunk_size = 100,
-        chunk_overlap  = 20,
-        length_function = len,
-    )
+    pdfReader = PdfReader(path)
+    pages = len(pdfReader.pages)
+    print("Number of Pages: ", pages)
 
-    texts = text_splitter.create_documents([pdf_docu])
-    for i in range(texts):
-        print(texts[i])
+    text_data = []
 
-    return texts
+    for i in range(pages):
+        text_data.append(pdfReader.pages[i].extract_text())
+
+    return text_data, pages
 
 
 def generate_video_script(text_data):
@@ -67,6 +64,7 @@ def get_images(keyword_array):
     for index, key in enumerate(keyword_array):
         url = "https://pixabay.com/api/?key=36447779-8e6272c9ff054351cb18d32ff&q=" + key + "&image_type=photo"
         image_result = requests.get(url).json()
+        print(image_result)
         image_url = image_result['hits'][0]['largeImageURL']
 
         image_response = requests.get(image_url)
@@ -124,23 +122,38 @@ def get_audios(script_array):
             fp.write(audio_get.content)
             fp.close()
 
+
+# def main():
+#     file_path = "testdoc.pdf"
+#     docs = load_pdf_file(file_path)
+#     result = custom_prompt(docs)
+#     print(result)
+#
+#
+# if __name__ == '__main__':
+#     main()
+
+
 def main():
-    file_path = "testdoc.pdf"
-    docs = load_pdf_file(file_path)
-    result = custom_prompt(docs)
-    print(result)
+    text, num_pages = extract_pdf('./testdoc.pdf')
+    script = []
+    keyword = []
+
+    for i in range(num_pages):
+        result = generate_video_script(text[i])
+        script.append(result)
+        keyword.append((result.split())[1])
+        print(keyword[i])
+        # time.sleep(10)  # 10 seconds API cooldown
+
+    get_images(keyword)
+    get_audios(script)
+
+    # Video generation
+    image_paths, audio_paths = generate_paths('./Images', './Audios')
+    merge_image_audio(image_paths, audio_paths, './Videos')
+    concat_videos("./Videos")
+
+
 if __name__ == '__main__':
     main()
-# Main Program Here
-# text, num_pages = extract_pdf(file_path)
-# script = []
-# keyword = []
-#
-# for i in range(num_pages):
-#     result = generate_video_script(text[i])
-#     script.append(result)
-#     keyword.append((result.split())[1])
-#     # time.sleep(10)  # 10 seconds API cooldown
-#
-# get_images(keyword)
-# get_audios(script)
