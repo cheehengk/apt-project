@@ -6,12 +6,12 @@ import requests
 import os
 from langchain.document_loaders import PyPDFLoader
 from langchain.docstore.document import Document
-
-os.environ['OPENAI_API_KEY'] = "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"
-pixabay_api_key = "36447779-8e6272c9ff054351cb18d32ff"
 from langchain.prompts import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from langchain import OpenAI, PromptTemplate, LLMChain
+os.environ['OPENAI_API_KEY'] = "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"
+pixabay_api_key = "36447779-8e6272c9ff054351cb18d32ff"
+
 def load_pdf_file(filepath):
     loader = PyPDFLoader(filepath)
     pages = loader.load_and_split()
