@@ -10,9 +10,11 @@ from langchain.prompts import PromptTemplate
 from langchain.chains.summarize import load_summarize_chain
 from langchain import OpenAI, PromptTemplate, LLMChain
 from create_video import merge_image_audio, generate_paths, concat_videos
+from keys import openai_api_key, pixabay_api_key, audio_authorisation_key, audio_user_id
 
-os.environ['OPENAI_API_KEY'] = "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"
-pixabay_api_key = "36447779-8e6272c9ff054351cb18d32ff"
+
+os.environ['OPENAI_API_KEY'] = openai_api_key
+
 
 
 def load_pdf_file(filepath):
@@ -62,7 +64,7 @@ def generate_video_script(text_data):
 
 def get_images(keyword_array):
     for index, key in enumerate(keyword_array):
-        url = "https://pixabay.com/api/?key=36447779-8e6272c9ff054351cb18d32ff&q=" + key + "&image_type=photo"
+        url = "https://pixabay.com/api/?key=" + pixabay_api_key + "&q=" + key + "&image_type=photo"
         image_result = requests.get(url).json()
         print(image_result)
         image_url = image_result['hits'][0]['largeImageURL']
@@ -88,8 +90,8 @@ def get_audios(script_array):
         headers = {
             "accept": "application/json",
             "content-type": "application/json",
-            "AUTHORIZATION": "2678135098fb4da7b280ab7a0ff79073",
-            "X-USER-ID": "067LoF4jArN6VRzoheup5ImrEId2"
+            "AUTHORIZATION": audio_authorisation_key,
+            "X-USER-ID": audio_user_id
         }
 
         audio_response = requests.post(url, json=payload, headers=headers).json()
@@ -100,8 +102,8 @@ def get_audios(script_array):
 
         headers = {
             "accept": "application/json",
-            "AUTHORIZATION": "2678135098fb4da7b280ab7a0ff79073",
-            "X-USER-ID": "067LoF4jArN6VRzoheup5ImrEId2"
+            "AUTHORIZATION": audio_authorisation_key,
+            "X-USER-ID": audio_user_id
         }
 
         audio_url_response = requests.get(url, headers=headers).json()
