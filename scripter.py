@@ -1,6 +1,7 @@
 import time
 import openai
 from PyPDF2 import PdfReader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
 import requests
 
 openai.api_key = "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"
@@ -8,16 +9,20 @@ pixabay_api_key = "36447779-8e6272c9ff054351cb18d32ff"
 
 
 def extract_pdf(path):
-    pdfReader = PdfReader(path)
-    pages = len(pdfReader.pages)
-    print("Number of Pages: ", pages)
+    with open(path) as f:
+        pdf_docu = f.read()
+    
+    text_splitter = RecursiveCharacterTextSplitter(
+        chunk_size = 100,
+        chunk_overlap  = 20,
+        length_function = len,
+    )
 
-    text_data = []
+    texts = text_splitter.create_documents([pdf_docu])
+    for i in range(texts):
+        print(texts[i])
 
-    for i in range(pages):
-        text_data.append(pdfReader.pages[i].extract_text())
-
-    return text_data, pages
+    return texts
 
 
 def generate_video_script(text_data):
