@@ -3,9 +3,32 @@ import openai
 from PyPDF2 import PdfReader
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 import requests
+import os
+from langchain.document_loaders import PyPDFLoader
+from langchain.docstore.document import Document
 
-openai.api_key = "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"
+os.environ['OPENAI_API_KEY'] = "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"
 pixabay_api_key = "36447779-8e6272c9ff054351cb18d32ff"
+from langchain.prompts import PromptTemplate
+from langchain.chains.summarize import load_summarize_chain
+from langchain import OpenAI, PromptTemplate, LLMChain
+def load_pdf_file(filepath):
+    loader = PyPDFLoader(filepath)
+    pages = loader.load_and_split()
+    return pages
+
+def custom_prompt(docs):
+    # print(docs)
+    # docs = [Document(page_content=t) for t in docs]
+
+    prompt_template = """Summarise in 20 words:
+    {text}
+
+
+    CONCISE SUMMARY IN ENGLISH:"""
+    PROMPT = PromptTemplate(template=prompt_template, input_variables=["text"])
+    chain = load_summarize_chain(OpenAI(temperature=0), chain_type="stuff", prompt=PROMPT)
+    return chain.run(docs)
 
 
 def extract_pdf(path):
@@ -101,18 +124,23 @@ def get_audios(script_array):
             fp.write(audio_get.content)
             fp.close()
 
-
+def main():
+    file_path = "testdoc.pdf"
+    docs = load_pdf_file(file_path)
+    result = custom_prompt(docs)
+    print(result)
+if __name__ == '__main__':
+    main()
 # Main Program Here
-file_path = "testdoc.pdf"
-text, num_pages = extract_pdf(file_path)
-script = []
-keyword = []
-
-for i in range(num_pages):
-    result = generate_video_script(text[i])
-    script.append(result)
-    keyword.append((result.split())[1])
-    # time.sleep(10)  # 10 seconds API cooldown
-
-get_images(keyword)
-get_audios(script)
+# text, num_pages = extract_pdf(file_path)
+# script = []
+# keyword = []
+#
+# for i in range(num_pages):
+#     result = generate_video_script(text[i])
+#     script.append(result)
+#     keyword.append((result.split())[1])
+#     # time.sleep(10)  # 10 seconds API cooldown
+#
+# get_images(keyword)
+# get_audios(script)
