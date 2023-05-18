@@ -1,3 +1,4 @@
+import re
 import time
 import openai
 from PyPDF2 import PdfReader
@@ -6,9 +7,11 @@ from langchain.document_loaders import PyPDFLoader
 from langchain.chains.summarize import load_summarize_chain
 from langchain import OpenAI, PromptTemplate
 from create_video import merge_image_audio, generate_paths, concat_videos
-from keys import pixabay_api_key, audio_authorisation_key, audio_user_id, openai_rotational_keys, number_of_api_keys
+from keys import pixabay_api_key, openai_rotational_keys, number_of_api_keys
 from file_cleaner import cleanup
 from gtts import gTTS
+from random import randint
+import string
 
 
 # os.environ['OPENAI_API_KEY'] = openai_api_key
@@ -48,15 +51,27 @@ def get_key(key):
 
 
 def rotate_key(key):
-    print("api rotating")
     new_key = 0 if key == (number_of_api_keys - 1) else key + 1
     print("rotated key from ", key, " to ", new_key)
     return new_key
 
 
+def slice_script(script):
+    words = script.split()
+    slices = []
+    chunk_size = 10
+
+    for i in range(0, len(words), chunk_size):
+        chunk = ' '.join(words[i:i + chunk_size])
+        slices.append(chunk)
+
+    return slices
+
+
 def generate_video_script(text_data, key):
     openai.api_key = get_key(key)
-    prompt = "Give me a short summarised video transcript for this text: " + text_data
+    prompt = "Give me a short summarised video transcript for this text, shorten the number of words by 70%: " \
+             + text_data
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -66,13 +81,25 @@ def generate_video_script(text_data, key):
         ],
         temperature=0
     )
-    output = response.choices[0].message.content
+    output = slice_script(response.choices[0].message.content)
     return output
+
+
+def strip_punctuations(text):
+    # Remove starting punctuations
+    while text and text[0] in string.punctuation:
+        text = text[1:]
+
+    # Remove ending punctuations
+    while text and text[-1] in string.punctuation:
+        text = text[:-1]
+
+    return text
 
 
 def generate_keyword(text_data, key):
     openai.api_key = get_key(key)
-    prompt = "Give me a keyword describing this piece of text: " + text_data
+    prompt = "Identify a one word noun which describes this piece of text: " + text_data
 
     response = openai.ChatCompletion.create(
         model="gpt-3.5-turbo",
@@ -80,9 +107,9 @@ def generate_keyword(text_data, key):
             {"role": "user",
              "content": prompt}
         ],
-        temperature=0
+        temperature=0.5
     )
-    output = response.choices[0].message.content
+    output = strip_punctuations(response.choices[0].message.content)
     return output
 
 
@@ -90,11 +117,18 @@ def get_images(keyword_array):
     for index, key in enumerate(keyword_array):
         url = "https://pixabay.com/api/?key=" + pixabay_api_key + "&q=" + key + "&image_type=photo"
         image_result = requests.get(url).json()
-        image_url = image_result['hits'][0]['largeImageURL']
-        print(image_url)
+
+        response = image_result.get('hits', [])
+        if len(response):
+            rand = randint(0, 2)
+            try:
+                image_url = response[rand]['largeImageURL']
+            except IndexError:
+                image_url = "https://pixabay.com/get/gcfcafd5ec3dc85b8b24b0da96ec1b54b078ee9e9a07aefee345f7d885bf5228f15b848036c51797d6d9313e24faeb4972c3d796595133ad3541936b991568d5b_1280.jpg"
+        else:
+            image_url = "https://pixabay.com/get/gcfcafd5ec3dc85b8b24b0da96ec1b54b078ee9e9a07aefee345f7d885bf5228f15b848036c51797d6d9313e24faeb4972c3d796595133ad3541936b991568d5b_1280.jpg"
 
         image_response = requests.get(image_url)
-
         if image_response.status_code:
             filepath = "Images/" + str(index) + ".jpg"
             fp = open(filepath, 'wb')
@@ -109,74 +143,6 @@ def get_audios(script_array):
         speech.save(filepath)
 
 
-# def get_audios(script_array):
-#     for index, scr in enumerate(script_array):
-#         url = "https://play.ht/api/v1/convert"
-#
-#         content = scr
-#         payload = {
-#             "content": [content],
-#             "voice": "en-US-JennyNeural"
-#         }
-#         headers = {
-#             "accept": "application/json",
-#             "content-type": "application/json",
-#             "AUTHORIZATION": audio_authorisation_key,
-#             "X-USER-ID": audio_user_id
-#         }
-#
-#         audio_response = requests.post(url, json=payload, headers=headers)
-#         if not audio_response.status_code == 200:
-#             cleanup()
-#             raise BaseException("Text to Speech API gateway is failing...")
-#
-#         audio_response = audio_response.json()
-#
-#         try:
-#             transcription_code = audio_response['transcriptionId']
-#         except BaseException:
-#             print(audio_response)
-#             cleanup()
-#             raise "audio response is bad"
-#
-#         url = "https://play.ht/api/v1/articleStatus?transcriptionId=" + transcription_code
-#
-#         headers = {
-#             "accept": "application/json",
-#             "AUTHORIZATION": audio_authorisation_key,
-#             "X-USER-ID": audio_user_id
-#         }
-#
-#         audio_url_response = requests.get(url, headers=headers).json()
-#         print(audio_url_response)
-#
-#         while not audio_url_response['converted']:
-#             time.sleep(10)
-#             audio_url_response = requests.get(url, headers=headers).json()
-#             print(audio_url_response)
-#
-#         audio_url = audio_url_response['audioUrl']
-#
-#         audio_get = requests.get(audio_url)
-#
-#         if audio_get.status_code:
-#             filepath = "Audios/" + str(index) + ".mp3"
-#             fp = open(filepath, 'wb')
-#             fp.write(audio_get.content)
-#             fp.close()
-
-
-# def main():
-#     file_path = "testdoc.pdf"
-#     docs = load_pdf_file(file_path)
-#     result = custom_prompt(docs)
-#     print(result)
-#
-#
-# if __name__ == '__main__':
-#     main()
-
-
 def main():
     current_openai_key = 0
     text, num_pages = extract_pdf('testdoc.pdf')
@@ -184,21 +150,28 @@ def main():
     keyword = []
 
     for i in range(num_pages):
-        script.append(generate_video_script(text[i], current_openai_key))
-        keyword.append(generate_keyword(text[i], current_openai_key).split()[0])
+        script += generate_video_script(text[i], current_openai_key)
         current_openai_key = rotate_key(current_openai_key)
-        print(keyword[i])
-        # time.sleep(10)  # 10 seconds API cooldown
+
+    print("Number of Scenes: ", len(script))
+
+    for j in range(len(script)):
+        keyword.append(generate_keyword(script[j], current_openai_key).split()[0])
+        current_openai_key = rotate_key(current_openai_key)
+        print(keyword[j])
+        time.sleep(10)
 
     get_images(keyword)
     get_audios(script)
 
     # Video generation
     image_paths, audio_paths = generate_paths('./Images', './Audios')
-    merge_image_audio(image_paths, audio_paths, './Videos')
+    merge_image_audio(image_paths, audio_paths, './Videos', script)
     concat_videos("./Videos")
     cleanup()
     print("Video is successfully produced.")
+    for scr in script:
+        print(scr + "\n")
 
 
 if __name__ == '__main__':

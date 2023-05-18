@@ -48,4 +48,5 @@ def cleanup():
     clean_videos()
     print("Intermediary assets cleaned up.")
 
+
 cleanup()
