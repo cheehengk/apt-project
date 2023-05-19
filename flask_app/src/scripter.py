@@ -100,3 +100,4 @@ def main():
 # except IndexError:
 #     raise Exception("PLease add .pdf file as argument")
 
+main()

@@ -1,8 +1,7 @@
 import os
-from flask import Flask, render_template, make_response, request, redirect, url_for
+import src.scripter
+from flask import Flask, render_template, make_response, request, redirect
 from werkzeug.utils import secure_filename
-from src.scripter import main
-from threading import Thread
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -43,20 +42,14 @@ def upload_file():
         if f and allowed_file(f.filename):
             f.filename = 'user_upload.pdf'
             f.save(os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename)))
+
             return 'file uploaded successfully'
         else:
             return redirect('/error/invalid-file-type')
 
 
-@app.route('/loading')
-def loading():
-    thread = Thread(target=ai_conversion())
-    thread.start()
-
-    return make_response(render_template('video.html'))
-
-
 def ai_conversion():
+    print('loading')
     dir_path = os.path.join(os.path.abspath(os.path.dirname(__file__)), 'uploads')
     file_count = 0
     # Iterate directory
@@ -68,7 +61,7 @@ def ai_conversion():
         return redirect('/error/file-count-error')
 
     # AI Conversion here
-    response = main()
+    response = 0
 
     if not response == 0:
         return redirect('/error/conversion-failure')
