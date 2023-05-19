@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AI converter</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <h1>AI Converter</h1>
+    <div class = "Description">
+        <p>Welcome to our AI Converter website.
+            If you are struggling to understand any assignments given from school or tasks given at work,
+            try our AI converter. Just convert your assignment/task into a text pdf file and upload here.
+            This AI converter will then process the pdf file and make an instructional video for you.
+        </p>
+    </div>
+    <div class = "Instruction">
+        <h3>How to get your informal instructional video from the PDF</h3>
+        <ol>
+            <li>Upload your pdf that you want to convert below</li>
+            <li>Click on the convert button</li>
+            <li>Wait for the process to complete (This may take a few minutes)</li>
+            <il>Download the instructional video that has been processed</il>
+        </ol>
+    </div>
+    <div class = "Converter">
+        <h2>AI Converter Machine</h2>
+        <div id="drop-area">
+            <form class="my-form" action="http://127.0.0.1:5000/uploader" method="POST" enctype = "multipart/form-data">
+                <p>Upload your single pdf file by dragging and dropping your file onto the dashed region</p>
+                <input type = "file" name = "file" />
+                <input type = "submit"/>
+            </form>
+            <p><var>{{message}}</var></p>
+            <div id="gallery"></div>
+        </div>
+
+
+    </div>
+</body>
+</html>
