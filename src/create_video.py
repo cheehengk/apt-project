@@ -8,8 +8,14 @@ from moviepy.video.fx.resize import resize
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
-def get_rank(filename):
+def get_img_aud_rank(filename):
     filename = filename[9:]
+    filename = filename[:-4]
+    return int(filename)
+
+
+def get_txt_rank(filename):
+    filename = filename[8:]
     filename = filename[:-4]
     return int(filename)
 
@@ -20,8 +26,8 @@ def merge_image_audio(image_array, audio_array, output_path, script):
     if not len(image_array) == len(script):
         raise Exception("Number of images and script lines do not match!")
 
-    image_array.sort(key=get_rank)
-    audio_array.sort(key=get_rank)
+    image_array.sort(key=get_img_aud_rank)
+    audio_array.sort(key=get_img_aud_rank)
     print(image_array)
     print(audio_array)
 
@@ -32,7 +38,7 @@ def merge_image_audio(image_array, audio_array, output_path, script):
         video_clip.duration = audio_clip.duration
 
         subtitle_text = script[index]
-        subtitle = TextClip(subtitle_text, fontsize=24, color="white", bg_color="black", kerning=-1)
+        subtitle = TextClip(subtitle_text, fontsize=30, color="white", bg_color="black", kerning=-1)
         subtitle = subtitle.set_duration(video_clip.duration)
         subtitle = subtitle.set_position(("center", "bottom"))
         video_with_subtitle = CompositeVideoClip([video_clip, subtitle])
@@ -43,29 +49,19 @@ def merge_image_audio(image_array, audio_array, output_path, script):
         video_with_subtitle.write_videofile(filepath, fps=1, threads=1, codec="libx264")
 
 
-def generate_paths(image_path, audio_path):
-    image_path_array = []
-    audio_path_array = []
+def generate_paths(path):
+    path_array = []
 
     # Loop through each file in the directory
-    for image_filename in os.listdir(image_path):
+    for image_filename in os.listdir(path):
         # Construct the full file path by joining the directory path and filename
-        file_path = os.path.join(image_path, image_filename)
+        file_path = os.path.join(path, image_filename)
 
         # Check if the file path is a file (not a subdirectory)
         if os.path.isfile(file_path):
-            image_path_array.append(file_path)
+            path_array.append(file_path)
 
-    # Loop through each file in the directory
-    for audio_filename in os.listdir(audio_path):
-        # Construct the full file path by joining the directory path and filename
-        file_path = os.path.join(audio_path, audio_filename)
-
-        # Check if the file path is a file (not a subdirectory)
-        if os.path.isfile(file_path):
-            audio_path_array.append(file_path)
-
-    return image_path_array, audio_path_array
+    return path_array
 
 
 def concat_videos(video_path):
@@ -79,7 +75,7 @@ def concat_videos(video_path):
             if os.path.isfile(file_path):
                 video_path_array.append(file_path)
 
-    video_path_array.sort(key=get_rank)
+    video_path_array.sort(key=get_img_aud_rank)
     print(video_path_array)
 
     clips = []
@@ -93,7 +89,6 @@ def concat_videos(video_path):
     filepath = "./movie.mp4"
     open(filepath, 'wb')
     movie.write_videofile(filepath, fps=1, threads=1, codec="libx264")
-
 
 # script = ["okk", "okk", "okk", "okk", "okk",
 #           "okk", "okk", "okk", "okk", "okk",

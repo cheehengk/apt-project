@@ -4,6 +4,7 @@ import shutil
 audio_folder = 'Audios'
 image_folder = 'Images'
 video_folder = 'Videos'
+text_folder = 'Texts'
 
 
 def clean_images():
@@ -42,10 +43,23 @@ def clean_videos():
             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
+def clean_texts():
+    for filename in os.listdir(text_folder):
+        file_path = os.path.join(text_folder, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
 def cleanup():
     clean_images()
     clean_audios()
     clean_videos()
+    clean_texts()
     print("Intermediary assets cleaned up.")
 
 
