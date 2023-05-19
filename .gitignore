@@ -1,7 +1,4 @@
-Audios/
-Images/
-Videos/
 .idea
 venv
 movie.mp4
-keys.py
+src/keys.py
