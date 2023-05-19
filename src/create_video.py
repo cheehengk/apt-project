@@ -9,13 +9,13 @@ from moviepy.video.io.VideoFileClip import VideoFileClip
 
 
 def get_img_aud_rank(filename):
-    filename = filename[9:]
+    filename = filename[10:]
     filename = filename[:-4]
     return int(filename)
 
 
 def get_txt_rank(filename):
-    filename = filename[8:]
+    filename = filename[9:]
     filename = filename[:-4]
     return int(filename)
 
@@ -86,7 +86,7 @@ def concat_videos(video_path):
 
     movie = concatenate_videoclips(clips, method='compose')
 
-    filepath = "./movie.mp4"
+    filepath = "../movie.mp4"
     open(filepath, 'wb')
     movie.write_videofile(filepath, fps=1, threads=1, codec="libx264")
 

@@ -3,9 +3,12 @@ from langchain import OpenAI
 from langchain.chains.summarize import load_summarize_chain
 from langchain.chains import AnalyzeDocumentChain
 from create_video import get_txt_rank, generate_paths
-from scripter import get_key
 from PyPDF2 import PdfReader
-import requests
+from keys import openai_rotational_keys
+
+
+def get_key(key):
+    return openai_rotational_keys[key]
 
 
 def slice_script(script):
@@ -62,7 +65,7 @@ def extract_pdf(path):
         text_data.append(text_string)
 
     for j, txt in enumerate(text_data):
-        text_path = 'Texts/' + str(j) + '.txt'
+        text_path = '../Texts/' + str(j) + '.txt'
         text_file = open(text_path, "w")
         text_file.write(txt)
         text_file.close()

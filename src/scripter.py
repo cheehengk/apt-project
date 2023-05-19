@@ -1,3 +1,4 @@
+import sys
 import string
 import openai
 from tenacity import retry, wait_random_exponential
@@ -47,10 +48,11 @@ def generate_keyword(text_data, key):
     return output
 
 
-def main():
+def main(pdf):
     current_openai_key = 0
     print("EXTRACTING PDF......")
-    extract_pdf('bitcoin.pdf')
+    pdf_path = '../' + pdf
+    extract_pdf(pdf_path)
 
     print("ANALYZING...")
     script = analyse_doc(current_openai_key)
@@ -82,5 +84,14 @@ def main():
     print("Video is successfully produced.")
 
 
-if __name__ == '__main__':
-    main()
+# Process command line arguments
+try:
+    if sys.argv[1].endswith('.pdf'):
+        main(pdf=sys.argv[1])
+    else:
+        raise Exception("Invalid file type, please add .pdf file")
+except IndexError:
+    raise Exception("PLease add .pdf file as argument")
+
+
+

@@ -1,10 +1,10 @@
 import os
 import shutil
 
-audio_folder = 'Audios'
-image_folder = 'Images'
-video_folder = 'Videos'
-text_folder = 'Texts'
+audio_folder = '../Audios'
+image_folder = '../Images'
+video_folder = '../Videos'
+text_folder = '../Texts'
 
 
 def clean_images():
@@ -62,5 +62,4 @@ def cleanup():
     clean_texts()
     print("Intermediary assets cleaned up.")
 
-
-cleanup()
+# cleanup()

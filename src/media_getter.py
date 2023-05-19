@@ -25,7 +25,7 @@ def get_images(keyword_array):
 
         image_response = requests.get(image_url)
         if image_response.status_code:
-            filepath = "Images/" + str(index) + ".jpg"
+            filepath = "../Images/" + str(index) + ".jpg"
             fp = open(filepath, 'wb')
             fp.write(image_response.content)
             fp.close()
@@ -34,5 +34,5 @@ def get_images(keyword_array):
 def get_audios(script_array):
     for index, scr in enumerate(script_array):
         speech = gTTS(scr)
-        filepath = "Audios/" + str(index) + ".mp3"
+        filepath = "../Audios/" + str(index) + ".mp3"
         speech.save(filepath)
