@@ -1,13 +1,13 @@
-import sys
 import os
 import string
 import openai
 from tenacity import retry, wait_random_exponential
-from create_video import merge_image_audio, generate_paths, concat_videos
-from keys import openai_rotational_keys, number_of_api_keys
-from document_analyser import analyse_doc, extract_pdf
-from media_getter import get_images, get_audios
-from file_cleaner import cleanup
+
+from flask_app.src.processor.create_video import generate_paths, merge_image_audio, concat_videos
+from flask_app.src.llm.document_analyser import extract_pdf, analyse_doc
+from flask_app.src.processor.file_cleaner import cleanup
+from flask_app.src.keys import openai_rotational_keys, number_of_api_keys
+from flask_app.src.processor.media_getter import get_images, get_audios
 
 PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
@@ -99,5 +99,3 @@ def main():
 #         raise Exception("Invalid file type, please add .pdf file")
 # except IndexError:
 #     raise Exception("PLease add .pdf file as argument")
-
-main()

@@ -1,7 +1,7 @@
 import os
 import shutil
 
-PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
 AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
 VIDEO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Videos')

@@ -6,7 +6,7 @@ from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.video.fx.resize import resize
 from moviepy.video.io.VideoFileClip import VideoFileClip
 
-OUTPUT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+OUTPUT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 
 
 def get_img_aud_rank(filename):

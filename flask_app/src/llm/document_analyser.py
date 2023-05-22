@@ -2,11 +2,12 @@ import os
 from langchain import OpenAI
 from langchain.chains.summarize import load_summarize_chain
 from langchain.chains import AnalyzeDocumentChain
-from create_video import get_txt_rank, generate_paths
 from PyPDF2 import PdfReader
-from keys import openai_rotational_keys
 
-PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
+from flask_app.src.processor.create_video import generate_paths, get_txt_rank
+from flask_app.src.keys import openai_rotational_keys
+
+PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 TEXT_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Texts')
 
 
