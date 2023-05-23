@@ -1,1 +1,1 @@
-# from .scripter import main
+# from scripter import main
