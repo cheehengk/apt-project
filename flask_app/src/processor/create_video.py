@@ -91,7 +91,7 @@ def concat_videos(video_path):
 
     movie = concatenate_videoclips(clips, method='compose')
 
-    filepath = "%s/output_video.mp4" % OUTPUT_PATH
+    filepath = "%s/local_store/output_video.mp4" % OUTPUT_PATH
     open(filepath, 'wb')
     movie.write_videofile(filepath, fps=1, threads=1, codec="libx264")
 

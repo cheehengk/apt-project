@@ -13,7 +13,7 @@ PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
 AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
 VIDEO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Videos')
-PDF_PATH = os.path.join(PARENT_PATH, 'uploads/user_upload.pdf')
+PDF_PATH = os.path.join(PARENT_PATH, 'local_store/user_upload.pdf')
 
 
 def get_key(key):
