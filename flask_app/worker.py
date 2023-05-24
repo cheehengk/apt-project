@@ -1,6 +1,6 @@
 from redis import Redis
 from rq import Worker, Queue, Connection
-from .flask_app.src.scripter import main
+from flask_app.src.scripter import main
 
 
 listen = ['default']
