@@ -1,18 +1,20 @@
 import datetime
 import os
 import shutil
+import time
 from datetime import timedelta
 from random import randint
 
 from redis import Redis
 from rq import Queue
-from flask import Flask, render_template, make_response, redirect, request
+from flask import Flask, render_template, make_response, request
 from werkzeug.utils import secure_filename
 from google.cloud import storage
 from flask_app.src.scripter import main
 import mysql.connector
-from flask_app.src.keys import sql_host, sql_database, sql_password, sql_user
+from flask_app.src.keys import sql_host, sql_database, sql_password, sql_user, socket_io_key
 from blinker import signal
+from flask_socketio import SocketIO, emit, Namespace
 
 RQ_FINISHED_STATUS = 'finished'
 UPLOAD_FOLDER = 'local_store'
@@ -22,13 +24,29 @@ app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_PATH'] = 1000000  # in bytes
 
+# SocketIO
+app.config['SECRET_KEY'] = socket_io_key
+socketio = SocketIO(app)
+signal_namespace = Namespace()
+
 # DO NOT CHANGE!!!
 GCS_BUCKET = "ai-proj"
 PDF_FOLDER = "PDFs"
 VIDEO_FOLDER = "VIDEOs"
-
-
 # DO NOT CHANGE!!!
+
+wait_messages = [
+    "Please wait while we process your request.",
+    "We are working on it. Please hold on.",
+    "The process may take a moment. Thank you for your patience.",
+    "Sit tight! We're processing your data.",
+    "Just a moment, we're almost done.",
+    "Hang in there while we complete the task.",
+    "Please be patient while we finish the process.",
+    "We're crunching the numbers. Please wait.",
+    "Processing in progress. Your patience is appreciated.",
+    "Stay tuned! We'll be done shortly."
+]
 
 def create_sql_connection():
     print("establishing sql connection")
@@ -93,7 +111,7 @@ def upload_to_gcs(bucket_name, local_file_path, req_id, upload_type):
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(FOLDER + '/' + str(req_id) + EXT)
     blob.upload_from_filename(local_file_path)
-    url = blob.generate_signed_url(expiration=timedelta(hours=2), method="GET")
+    url = blob.generate_signed_url(expiration=timedelta(days=7), method="GET")
     return url
 
 
@@ -144,10 +162,6 @@ def index():
 def error(err):
     if err == 'invalid-file-type':
         err = 'Invalid File Type!'
-    elif err == 'file-count-error':
-        err = 'Wrong number of files in upload directory!'
-    elif err == 'conversion-failure':
-        err = 'Conversion failure!'
     else:
         err = 'Error!'
 
@@ -156,13 +170,13 @@ def error(err):
 
 @app.route('/uploader', methods=['GET', 'POST'])
 def upload_file():
+    socketio.emit('reading-file', {'message': 'Reading your file...'})
     f = request.files['file']
     if f and allowed_file(f.filename):
         req_id = random_with_N_digits(10)
         f.filename = 'user_upload.pdf'
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename))
         f.save(file_path)
-        # return redirect('/run')
 
         pdf_gcs_url = upload_to_gcs(GCS_BUCKET, file_path, req_id, 0)  # upload_type = 0 for PDF
 
@@ -171,14 +185,25 @@ def upload_file():
             pkey = upload_initial_sql_data(pdf_gcs_url)
             if not pkey == 0:
                 sql_insertion_signal.send([req_id, pkey])
-                return "Successful insertion"
+                return "Success"
             else:
-                return "sql insertion failure!"
+                socketio.emit('sql-insertion-failure', {'message': 'SQL Insertion Error, please try again later!'})
+                return "sql-insertion-failure"
         else:
-            return "bucket upload error!"
+            socketio.emit('bucket-upload-error!', {'message': 'Bucket Upload Error, please try again later!'})
+            return "bucket-upload-error!"
 
     else:
-        return redirect('/error/invalid-file-type')
+        return 'invalid-file-type'
+
+
+@socketio.on('connect')
+def handle_connect():
+    emit('connected', {'message': 'Connected to the server'})
+
+
+def random_message():
+    return wait_messages[randint(0, 9)]
 
 
 def run(details):
@@ -186,16 +211,24 @@ def run(details):
     pkey = details[1]
     task = q.enqueue(main)
     while not task.get_status() == RQ_FINISHED_STATUS:
-        print("PROCESSING")
+        time.sleep(7)
+        socketio.emit('conversion-message', {'message': random_message()})
 
     # Uploading mp4 to Google Cloud Buckets
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'output_video.mp4')
     video_gcs_url = upload_to_gcs(GCS_BUCKET, file_path, req_id, 1)
-
-    if update_sql_data(pkey, video_gcs_url, str(task.id)):
-        print(video_gcs_url)
-
     cleanup_local_store()
+
+    if video_gcs_url is not None:
+        if update_sql_data(pkey, video_gcs_url, str(task.id)):
+            socketio.emit('success', {'message': video_gcs_url})
+            return 'success'
+        else:
+            socketio.emit('sql-insertion-failure', {'message': 'SQL Insertion Error, please try again later!'})
+            return "sql-insertion-failure"
+    else:
+        socketio.emit('bucket-upload-error!', {'message': 'Bucket Upload Error, please try again later!'})
+        return "bucket-upload-error!"
 
 
 sql_insertion_signal.connect(run)
