@@ -4,7 +4,6 @@ import shutil
 import time
 from datetime import timedelta
 from random import randint
-
 from redis import Redis
 from rq import Queue
 from flask import Flask, render_template, make_response, request
@@ -12,9 +11,16 @@ from werkzeug.utils import secure_filename
 from google.cloud import storage
 from flask_app.src.scripter import main
 import mysql.connector
-from flask_app.src.keys import sql_host, sql_database, sql_password, sql_user, socket_io_key
 from blinker import signal
 from flask_socketio import SocketIO, emit, Namespace
+from dotenv import dotenv_values
+
+env_vars = dotenv_values("src/.env")
+sql_host = env_vars.get("SQL_HOST")
+sql_database = env_vars.get("SQL_DATABASE")
+sql_user = env_vars.get("SQL_USER")
+sql_password = env_vars.get("SQL_PW")
+socket_io_key = env_vars.get("SOCKETIO_KEY")
 
 RQ_FINISHED_STATUS = 'finished'
 UPLOAD_FOLDER = 'local_store'
@@ -47,6 +53,7 @@ wait_messages = [
     "Processing in progress. Your patience is appreciated.",
     "Stay tuned! We'll be done shortly."
 ]
+
 
 def create_sql_connection():
     print("establishing sql connection")

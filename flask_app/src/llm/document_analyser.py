@@ -3,16 +3,20 @@ from langchain import OpenAI
 from langchain.chains.summarize import load_summarize_chain
 from langchain.chains import AnalyzeDocumentChain
 from PyPDF2 import PdfReader
+from dotenv import dotenv_values
 
 from flask_app.src.processor.create_video import generate_paths, get_txt_rank
-from flask_app.src.keys import openai_rotational_keys
 
 PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 TEXT_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Texts')
 
+env_vars = dotenv_values(os.path.join(PARENT_PATH, "src/.env"))
+openai_rotational_keys = [env_vars.get("OPENAI_KEY_1"), env_vars.get("OPENAI_KEY_2")]
+
 
 def get_key(key):
     return openai_rotational_keys[key]
+
 
 def slice_script(script):
     words = script.split()

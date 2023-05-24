@@ -2,12 +2,14 @@ import requests
 import os
 from gtts import gTTS
 from random import randint
-
-from flask_app.src.keys import pixabay_api_key
+from dotenv import dotenv_values
 
 PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
 AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
+
+env_vars = dotenv_values(os.path.join(PARENT_PATH, "src/.env"))
+pixabay_api_key = env_vars.get("PIXABAY_API_KEY")
 
 
 def get_images(keyword_array):
