@@ -5,6 +5,8 @@
     <title>AI converter</title>
     <link rel="stylesheet" href="style.css">
 </head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
 <body>
     <h1>AI Converter</h1>
     <div class = "Description">
@@ -25,17 +27,56 @@
     </div>
     <div class = "Converter">
         <h2>AI Converter Machine</h2>
-        <div id="drop-area">
-            <form class="my-form" action="http://127.0.0.1:5000/uploader" method="POST" enctype = "multipart/form-data">
-                <p>Upload your single pdf file by dragging and dropping your file onto the dashed region</p>
-                <input type = "file" name = "file" />
-                <input type = "submit"/>
-            </form>
-            <p><var>{{message}}</var></p>
-            <div id="gallery"></div>
-        </div>
+        <input type="file" id="file-input">
+        <button id="trigger-button">Convert</button>
+        <div id="response-container"></div>
+        <script>
+           $(document).ready(function() {
+               const socket = io();  // Establish the WebSocket connection
+               const myButton = document.getElementById('trigger-button');
+               socket.on('connected', function (data) {
+                   $('#response-container').html('<h4>Status: ' + data.message + '</h4>');
+                   myButton.disabled = false;
+               });
 
+               socket.on('reading-file', function (data) {
+                   $('#response-container').html('<h4>Status: ' + data.message + '</h4>');
+                   myButton.disabled = true;
+               });
 
-    </div>
+               socket.on('conversion-message', function (data) {
+                   $('#response-container').html('<h4>Status: ' + data.message + '</h4>');
+                   myButton.disabled = true;
+               });
+
+               socket.on('success', function (data) {
+                   $('#response-container').html('<h4>Status: Video Successfully Generated!</h4>' +
+                       '<a href="' + data.message + '" target="_blank"><button>View Video</button></a>')
+                   // + '<a href="' + data.message + '" download="your-ai-video"><button>Download Video</button></a>')
+                   myButton.disabled = false;
+               });
+
+               $('#trigger-button').click(function () {
+                   const file = document.getElementById('file-input').files[0];
+                   const formData = new FormData();
+                   formData.append('file', file);
+
+                   $.ajax({
+                       url: '/uploader',
+                       type: 'POST',
+                       data: formData,
+                       processData: false,
+                       contentType: false,
+                       success: function (response) {
+                           console.log(response)
+                       },
+                       error: function () {
+                           console.log('An error occurred while communicating with the server.');
+                       }
+                   });
+               });
+           });
+        </script>
+<!--    </div>-->
 </body>
 </html>
