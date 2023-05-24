@@ -63,4 +63,4 @@ def cleanup():
     clean_texts()
     print("Intermediary assets cleaned up.")
 
-# cleanup()
+cleanup()
