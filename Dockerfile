@@ -32,6 +32,5 @@ ENV GOOGLE_APPLICATION_CREDENTIALS /app/google_creds.json
 
 # Start Redis and run the Flask app
 #CMD service redis-server start && python app.py && python worker.py
-CMD python app.py
-CMD python worker.py
+CMD python app.py && python worker.py
 #CMD ["supervisord", "-c", "/etc/supervisor/conf.d/supervisord.conf"]
