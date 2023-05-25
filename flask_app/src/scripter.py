@@ -7,6 +7,7 @@ from flask_app.src.processor.create_video import generate_paths, merge_image_aud
 from flask_app.src.llm.document_analyser import extract_pdf, analyse_doc
 from flask_app.src.processor.file_cleaner import cleanup
 from flask_app.src.processor.media_getter import get_images, get_audios
+import logging
 
 PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
@@ -17,6 +18,9 @@ PDF_PATH = os.path.join(PARENT_PATH, 'local_store/user_upload.pdf')
 env_vars = dotenv_values("src/.env")
 openai_rotational_keys = [env_vars.get("OPENAI_KEY_1"), env_vars.get("OPENAI_KEY_2")]
 number_of_api_keys = 2
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
 
 
 def get_key(key):

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>AI converter</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet">
 </head>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.4.1/socket.io.js"></script>
@@ -47,6 +47,11 @@
                socket.on('conversion-message', function (data) {
                    $('#response-container').html('<h4>Status: ' + data.message + '</h4>');
                    myButton.disabled = true;
+               });
+
+               socket.on('error', function (data) {
+                   $('#response-container').html('<h4>Status: ' + data.message + '</h4>');
+                   myButton.disabled = false;
                });
 
                socket.on('success', function (data) {

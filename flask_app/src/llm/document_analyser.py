@@ -52,16 +52,16 @@ def analyse_doc(key):
 
 
 def extract_pdf(path):
-    pdfReader = PdfReader(path)
-    pages = len(pdfReader.pages)
-    print("Number of Pages: ", pages)
+    pdf = PdfReader(path)
+    page_count = len(pdf.pages)
+    print("Number of Pages: ", page_count)
 
     text_data = []
     text_string = ''
     page_counter = 0
 
-    for i in range(pages):
-        text_string += pdfReader.pages[i].extract_text()
+    for i in range(page_count):
+        text_string += pdf.pages[i].extract_text()
         page_counter += 1
         if page_counter == 5:
             text_data.append(text_string)
