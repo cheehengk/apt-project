@@ -2,4 +2,5 @@
 venv
 movie.mp4
 flask_app/src/keys.py
-flask_app/google_creds.json
+google_creds.json
+flask_app/src/.env

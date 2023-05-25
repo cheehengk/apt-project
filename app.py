@@ -4,7 +4,7 @@ import shutil
 import time
 from datetime import timedelta
 from random import randint
-from redis import Redis
+from PyPDF2 import PdfReader
 from rq import Queue
 from flask import Flask, render_template, make_response, request
 from werkzeug.utils import secure_filename
@@ -14,16 +14,23 @@ import mysql.connector
 from blinker import signal
 from flask_socketio import SocketIO, emit, Namespace
 from dotenv import dotenv_values
+from redis import Redis
 
-env_vars = dotenv_values("src/.env")
+env_vars = dotenv_values("flask_app/src/.env")
 sql_host = env_vars.get("SQL_HOST")
 sql_database = env_vars.get("SQL_DATABASE")
 sql_user = env_vars.get("SQL_USER")
 sql_password = env_vars.get("SQL_PW")
 socket_io_key = env_vars.get("SOCKETIO_KEY")
+redis_host = env_vars.get("REDIS_HOST")
+redis_port = env_vars.get("REDIS_PORT")
+redis_pw = env_vars.get("REDIS_PW")
+
+print(redis_host)
 
 RQ_FINISHED_STATUS = 'finished'
-UPLOAD_FOLDER = 'local_store'
+RQ_FAILED_STATUS = 'failed'
+UPLOAD_FOLDER = 'flask_app/local_store'
 ALLOWED_EXTENSIONS = {'pdf'}
 
 app = Flask(__name__)
@@ -40,6 +47,19 @@ GCS_BUCKET = "ai-proj"
 PDF_FOLDER = "PDFs"
 VIDEO_FOLDER = "VIDEOs"
 # DO NOT CHANGE!!!
+
+# Flask Signal
+
+sql_insertion_signal = signal('sql_insertion')
+
+# Redis Queue
+# redis_conn = Redis(
+#   host=redis_host,
+#   port=int(redis_port),
+#   password=redis_pw
+# )
+redis_conn = Redis()
+q = Queue(connection=redis_conn)
 
 wait_messages = [
     "Please wait while we process your request.",
@@ -76,21 +96,25 @@ insert_query = "INSERT INTO data ( PDF_URL, VIDEO_URL, CONVERSION_TASK_ID, TIME_
 # ON CONFLICT (unique_1, unique_2) UPDATE tb_name set other_field_1=value, other_field_2=value_2
 # ON CONFLICT (unique_1, unique_2) DO NOTHING -> ignore the insertion
 
-# Flask Signal
 
-sql_insertion_signal = signal('sql_insertion')
+def allowed_file(file):
+    filename = file.filename
+    extension_check = '.' in filename and \
+                      filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    if not extension_check:
+        return False
 
-# Redis Queue
-redis_conn = Redis()
-q = Queue(connection=redis_conn)
+    try:
+        pdf = PdfReader(file)
+        page_count = len(pdf.pages)
+    except Exception as e:
+        print('Cannot read file. Reason: %s' % e)
+        return False
 
-if __name__ == '__main__':
-    app.run()
+    if page_count > 15:
+        return False
 
-
-def allowed_file(filename):
-    return '.' in filename and \
-        filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    return True
 
 
 def cleanup_local_store():
@@ -179,7 +203,7 @@ def error(err):
 def upload_file():
     socketio.emit('reading-file', {'message': 'Reading your file...'})
     f = request.files['file']
-    if f and allowed_file(f.filename):
+    if f and allowed_file(f):
         req_id = random_with_N_digits(10)
         f.filename = 'user_upload.pdf'
         file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename))
@@ -194,14 +218,15 @@ def upload_file():
                 sql_insertion_signal.send([req_id, pkey])
                 return "Success"
             else:
-                socketio.emit('sql-insertion-failure', {'message': 'SQL Insertion Error, please try again later!'})
+                socketio.emit('error', {'message': 'SQL Insertion Error, please try again later!'})
                 return "sql-insertion-failure"
         else:
-            socketio.emit('bucket-upload-error!', {'message': 'Bucket Upload Error, please try again later!'})
-            return "bucket-upload-error!"
+            socketio.emit('error', {'message': 'Bucket Upload Error, please try again later!'})
+            return "bucket-upload-error"
 
     else:
-        return 'invalid-file-type'
+        socketio.emit('error', {'message': 'Incorrect file type, or PDF file is too large, limit to 15 pages!'})
+        return "invalid-file!"
 
 
 @socketio.on('connect')
@@ -218,8 +243,15 @@ def run(details):
     pkey = details[1]
     task = q.enqueue(main)
     while not task.get_status() == RQ_FINISHED_STATUS:
-        time.sleep(7)
-        socketio.emit('conversion-message', {'message': random_message()})
+        if task.get_status() == RQ_FAILED_STATUS:
+            exception = task.exc_info  # Get the exception details
+            error_message = str(exception[1]) if exception else 'Unknown error'
+            print(error_message)
+            cleanup_local_store()
+            socketio.emit('error', {'message': 'Conversion job failed!'})
+            return "conversion-job-failure"
+        time.sleep(10)
+        socketio.emit('conversion-message', {'message': str(task.get_status())})
 
     # Uploading mp4 to Google Cloud Buckets
     file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'output_video.mp4')
@@ -231,11 +263,14 @@ def run(details):
             socketio.emit('success', {'message': video_gcs_url})
             return 'success'
         else:
-            socketio.emit('sql-insertion-failure', {'message': 'SQL Insertion Error, please try again later!'})
+            socketio.emit('error', {'message': 'SQL Insertion Error, please try again later!'})
             return "sql-insertion-failure"
     else:
-        socketio.emit('bucket-upload-error!', {'message': 'Bucket Upload Error, please try again later!'})
+        socketio.emit('error', {'message': 'Bucket Upload Error, please try again later!'})
         return "bucket-upload-error!"
 
 
 sql_insertion_signal.connect(run)
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000)
