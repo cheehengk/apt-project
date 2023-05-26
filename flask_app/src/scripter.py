@@ -14,8 +14,8 @@ AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
 VIDEO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Videos')
 PDF_PATH = os.path.join(PARENT_PATH, 'local_store/user_upload.pdf')
 
-env_vars = dotenv_values("src/.env")
-openai_rotational_keys = [env_vars.get("OPENAI_KEY_1"), env_vars.get("OPENAI_KEY_2")]
+env_vars = dotenv_values('.env')
+openai_rotational_keys = [env_vars.get('OPENAI_KEY_1'), env_vars.get('OPENAI_KEY_2')]
 number_of_api_keys = 2
 
 
@@ -102,3 +102,6 @@ def main():
 #         raise Exception("Invalid file type, please add .pdf file")
 # except IndexError:
 #     raise Exception("PLease add .pdf file as argument")
+
+if __name__ == '__main__':
+    main()
