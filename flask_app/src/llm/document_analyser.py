@@ -1,3 +1,4 @@
+import io
 import os
 from langchain import OpenAI
 from langchain.chains.summarize import load_summarize_chain
@@ -51,8 +52,8 @@ def analyse_doc(key):
     return slice_script(script)
 
 
-def extract_pdf(path):
-    pdfReader = PdfReader(path)
+def extract_pdf(file):
+    pdfReader = PdfReader(io.BytesIO(file))
     pages = len(pdfReader.pages)
     print("Number of Pages: ", pages)
 

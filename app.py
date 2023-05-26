@@ -9,14 +9,13 @@ from rq import Queue
 from flask import Flask, render_template, make_response, request
 from werkzeug.utils import secure_filename
 from google.cloud import storage
-from flask_app.src.scripter import main
 import mysql.connector
 from blinker import signal
 from flask_socketio import SocketIO, emit, Namespace
 from dotenv import dotenv_values
 from redis import Redis
 
-env_vars = dotenv_values("src/.env")
+env_vars = dotenv_values("flask_app/src/.env")
 sql_host = env_vars.get("SQL_HOST")
 sql_database = env_vars.get("SQL_DATABASE")
 sql_user = env_vars.get("SQL_USER")
@@ -30,11 +29,9 @@ print(redis_host)
 
 RQ_FINISHED_STATUS = 'finished'
 RQ_FAILED_STATUS = 'failed'
-UPLOAD_FOLDER = 'flask_app/local_store'
 ALLOWED_EXTENSIONS = {'pdf'}
 
 app = Flask(__name__)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 app.config['MAX_CONTENT_PATH'] = 1000000  # in bytes
 
 # SocketIO
@@ -54,9 +51,9 @@ sql_insertion_signal = signal('sql_insertion')
 
 # Redis Queue
 # redis_conn = Redis(
-#   host=redis_host,
+#   host="redis",
 #   port=int(redis_port),
-#   password=redis_pw
+#   password="your_password"
 # )
 redis_conn = Redis()
 q = Queue(connection=redis_conn)
@@ -117,16 +114,16 @@ def allowed_file(file):
     return extension_check
 
 
-def cleanup_local_store():
-    for filename in os.listdir(UPLOAD_FOLDER):
-        file_path = os.path.join(UPLOAD_FOLDER, filename)
-        try:
-            if os.path.isfile(file_path) or os.path.islink(file_path):
-                os.unlink(file_path)
-            elif os.path.isdir(file_path):
-                shutil.rmtree(file_path)
-        except Exception as e:
-            print('Failed to delete %s. Reason: %s' % (file_path, e))
+# def cleanup_local_store():
+#     for filename in os.listdir(UPLOAD_FOLDER):
+#         file_path = os.path.join(UPLOAD_FOLDER, filename)
+#         try:
+#             if os.path.isfile(file_path) or os.path.islink(file_path):
+#                 os.unlink(file_path)
+#             elif os.path.isdir(file_path):
+#                 shutil.rmtree(file_path)
+#         except Exception as e:
+#             print('Failed to delete %s. Reason: %s' % (file_path, e))
 
 
 def random_with_N_digits(n):
@@ -135,13 +132,13 @@ def random_with_N_digits(n):
     return randint(range_start, range_end)
 
 
-def upload_to_gcs(bucket_name, local_file_path, req_id, upload_type):
-    FOLDER = PDF_FOLDER if upload_type == 0 else VIDEO_FOLDER
-    EXT = '.pdf' if upload_type == 0 else '.mp4'
+def upload_to_gcs(bucket_name, file, req_id):
+    FOLDER = PDF_FOLDER
+    EXT = '.pdf'
     storage_client = storage.Client()
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(FOLDER + '/' + str(req_id) + EXT)
-    blob.upload_from_filename(local_file_path)
+    blob.upload_from_file(file)
     url = blob.generate_signed_url(expiration=timedelta(days=7), method="GET")
     return url
 
@@ -205,17 +202,17 @@ def upload_file():
     f = request.files['file']
     if f and allowed_file(f):
         req_id = random_with_N_digits(10)
-        f.filename = 'user_upload.pdf'
-        file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename))
-        f.save(file_path)
+        # f.filename = 'user_upload.pdf'
+        # file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename))
+        # f.save(file_path)
 
-        pdf_gcs_url = upload_to_gcs(GCS_BUCKET, file_path, req_id, 0)  # upload_type = 0 for PDF
+        pdf_gcs_url = upload_to_gcs(GCS_BUCKET, f, req_id)  # upload_type = 0 for PDF
 
         if pdf_gcs_url is not None:
             print('upload_sql')
             pkey = upload_initial_sql_data(pdf_gcs_url)
             if not pkey == 0:
-                sql_insertion_signal.send([req_id, pkey])
+                sql_insertion_signal.send([req_id, pkey, pdf_gcs_url])
                 return "Success"
             else:
                 socketio.emit('error', {'message': 'SQL Insertion Error, please try again later!'})
@@ -241,22 +238,19 @@ def random_message():
 def run(details):
     req_id = details[0]
     pkey = details[1]
-    task = q.enqueue(main)
+    pdf_url = details[2]
+    task = q.enqueue('flask_app.src.scripter.main', [pdf_url, req_id])
     while not task.get_status() == RQ_FINISHED_STATUS:
         if task.get_status() == RQ_FAILED_STATUS:
             exception = task.exc_info  # Get the exception details
             error_message = str(exception[1]) if exception else 'Unknown error'
             print(error_message)
-            cleanup_local_store()
             socketio.emit('error', {'message': 'Conversion job failed!'})
             return "conversion-job-failure"
         time.sleep(10)
         socketio.emit('conversion-message', {'message': str(task.get_status())})
 
-    # Uploading mp4 to Google Cloud Buckets
-    file_path = os.path.join(app.config['UPLOAD_FOLDER'], 'output_video.mp4')
-    video_gcs_url = upload_to_gcs(GCS_BUCKET, file_path, req_id, 1)
-    cleanup_local_store()
+    video_gcs_url = task.result
 
     if video_gcs_url is not None:
         if update_sql_data(pkey, video_gcs_url, str(task.id)):

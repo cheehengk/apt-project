@@ -1,12 +1,18 @@
 import os
+import shutil
+
 from moviepy.editor import AudioFileClip, ImageClip
 from moviepy.video.VideoClip import TextClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
 from moviepy.video.compositing.concatenate import concatenate_videoclips
 from moviepy.video.fx.resize import resize
 from moviepy.video.io.VideoFileClip import VideoFileClip
+from google.cloud import storage
+from datetime import timedelta
 
 OUTPUT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
+GCS_BUCKET = "ai-proj"
+VIDEO_FOLDER = "VIDEOs"
 
 
 def get_img_aud_rank(filename):
@@ -69,7 +75,30 @@ def generate_paths(path):
     return path_array
 
 
-def concat_videos(video_path):
+def upload_to_gcs(bucket_name, file, req_id):
+    FOLDER = VIDEO_FOLDER
+    EXT = '.mp4'
+    storage_client = storage.Client()
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(FOLDER + '/' + str(req_id) + EXT)
+    blob.upload_from_filename(file)
+    url = blob.generate_signed_url(expiration=timedelta(days=7), method="GET")
+    return url
+
+
+def cleanup_local_store(filepath):
+    for filename in os.listdir(filepath):
+        file_path = os.path.join(filepath, filename)
+        try:
+            if os.path.isfile(file_path) or os.path.islink(file_path):
+                os.unlink(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print('Failed to delete %s. Reason: %s' % (file_path, e))
+
+
+def concat_videos(video_path, req_id):
     video_path_array = []
     for image_filename in os.listdir(video_path):
         # Construct the full file path by joining the directory path and filename
@@ -91,9 +120,13 @@ def concat_videos(video_path):
 
     movie = concatenate_videoclips(clips, method='compose')
 
-    filepath = "%s/local_store/output_video.mp4" % OUTPUT_PATH
+    filepath = "%s/local_video_store/output_video.mp4" % OUTPUT_PATH
     open(filepath, 'wb')
     movie.write_videofile(filepath, fps=1, threads=1, codec="libx264")
+    url = upload_to_gcs(GCS_BUCKET, filepath, req_id)
+    cleanup_local_store(OUTPUT_PATH + '/local_video_store')
+    return url
+
 
 # script = ["okk", "okk", "okk", "okk", "okk",
 #           "okk", "okk", "okk", "okk", "okk",

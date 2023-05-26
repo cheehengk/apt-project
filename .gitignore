@@ -6,3 +6,4 @@ google_creds.json
 flask_app/src/.env
 **/__pycache__/
 *.pyc
+.env
