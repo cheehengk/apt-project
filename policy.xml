@@ -1,0 +1,11 @@
+<policymap>
+  <policymap>
+    <policy domain="coder" rights="none" pattern="MVG" />
+    <policy domain="coder" rights="none" pattern="MSL" />
+    <policy domain="coder" rights="none" pattern="PLT" />
+    <policy domain="coder" rights="none" pattern="MVG" />
+    <policy domain="path" rights="read|write" pattern="@*" />
+    <policy domain="path" rights="none" pattern="!" />
+    <policy domain="path" rights="read|write" pattern="/app" />
+  </policymap>
+</policymap>

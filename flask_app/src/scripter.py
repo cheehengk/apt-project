@@ -13,7 +13,6 @@ PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
 AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
 VIDEO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Videos')
-PDF_PATH = os.path.join(PARENT_PATH, 'local_store/user_upload.pdf')
 
 env_vars = dotenv_values('.env')
 openai_rotational_keys = [env_vars.get('OPENAI_KEY_1'), env_vars.get('OPENAI_KEY_2')]
@@ -96,8 +95,8 @@ def main(payload):
     # Video generation
     image_paths = generate_paths('%s' % IMAGE_PATH)
     audio_paths = generate_paths('%s' % AUDIO_PATH)
-    merge_image_audio(image_paths, audio_paths, '%s' % VIDEO_PATH, script)
-    url = concat_videos("%s" % VIDEO_PATH, req_id)
+    merge_image_audio(image_paths, audio_paths, VIDEO_PATH, script)
+    url = concat_videos(VIDEO_PATH, req_id)
     cleanup()
     print("Video is successfully produced.")
     return url

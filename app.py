@@ -21,11 +21,6 @@ sql_database = env_vars.get("SQL_DATABASE")
 sql_user = env_vars.get("SQL_USER")
 sql_password = env_vars.get("SQL_PW")
 socket_io_key = env_vars.get("SOCKETIO_KEY")
-redis_host = env_vars.get("REDIS_HOST")
-redis_port = env_vars.get("REDIS_PORT")
-redis_pw = env_vars.get("REDIS_PW")
-
-print(redis_host)
 
 RQ_FINISHED_STATUS = 'finished'
 RQ_FAILED_STATUS = 'failed'
@@ -49,13 +44,7 @@ VIDEO_FOLDER = "VIDEOs"
 
 sql_insertion_signal = signal('sql_insertion')
 
-# Redis Queue
-# redis_conn = Redis(
-#   host="redis",
-#   port=int(redis_port),
-#   password="your_password"
-# )
-redis_conn = Redis()
+redis_conn = Redis(host='redis', port=6379, db=0)
 q = Queue(connection=redis_conn)
 
 wait_messages = [
