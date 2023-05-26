@@ -17,7 +17,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the app code into the container
 COPY app.py .
-COPY worker.py .
+COPY flask_app/src/worker.py .
 COPY flask_app /app/flask_app
 COPY templates /app/templates
 COPY google_creds.json /app/google_creds.json

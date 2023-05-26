@@ -16,7 +16,7 @@ from flask_socketio import SocketIO, emit, Namespace
 from dotenv import dotenv_values
 from redis import Redis
 
-env_vars = dotenv_values("flask_app/src/.env")
+env_vars = dotenv_values("src/.env")
 sql_host = env_vars.get("SQL_HOST")
 sql_database = env_vars.get("SQL_DATABASE")
 sql_user = env_vars.get("SQL_USER")
@@ -101,20 +101,20 @@ def allowed_file(file):
     filename = file.filename
     extension_check = '.' in filename and \
                       filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-    if not extension_check:
-        return False
+    # if not extension_check:
+    #     return False
+    #
+    # try:
+    #     pdf = PdfReader(file)
+    #     page_count = len(pdf.pages)
+    # except Exception as e:
+    #     print('Cannot read file. Reason: %s' % e)
+    #     return False
+    #
+    # if page_count > 15:
+    #     return False
 
-    try:
-        pdf = PdfReader(file)
-        page_count = len(pdf.pages)
-    except Exception as e:
-        print('Cannot read file. Reason: %s' % e)
-        return False
-
-    if page_count > 15:
-        return False
-
-    return True
+    return extension_check
 
 
 def cleanup_local_store():
