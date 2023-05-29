@@ -1,8 +1,9 @@
 import os
 import string
 import openai
+import requests
+from dotenv import load_dotenv
 from tenacity import retry, wait_random_exponential
-from dotenv import dotenv_values
 from flask_app.src.processor.create_video import generate_paths, merge_image_audio, concat_videos
 from flask_app.src.llm.document_analyser import extract_pdf, analyse_doc
 from flask_app.src.processor.file_cleaner import cleanup
@@ -12,10 +13,11 @@ PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
 AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
 VIDEO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Videos')
-PDF_PATH = os.path.join(PARENT_PATH, 'local_store/user_upload.pdf')
 
-env_vars = dotenv_values('.env')
-openai_rotational_keys = [env_vars.get('OPENAI_KEY_1'), env_vars.get('OPENAI_KEY_2')]
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+# dotenv_path = os.path.join(current_dir, '../../.env')
+# load_dotenv(dotenv_path)
+openai_rotational_keys = [os.environ.get('OPENAI_KEY_1'), os.environ.get('OPENAI_KEY_2')]
 number_of_api_keys = 2
 
 
@@ -58,13 +60,21 @@ def generate_keyword(text_data, key):
     return output
 
 
-def main():
+def download_pdf_payload(url):
+    response = requests.get(url)
+    return response.content
+
+
+def main(payload):
+    pdf_url = payload[0]
+    req_id = payload[1]
+    file = download_pdf_payload(pdf_url)
     current_openai_key = 0
     print("EXTRACTING PDF......")
-    extract_pdf(PDF_PATH)
+    extract_pdf(file)
 
     print("ANALYZING...")
-    script = analyse_doc(current_openai_key)
+    script = analyse_doc(get_key(current_openai_key))
     current_openai_key = rotate_key(current_openai_key)
 
     script_length = len(script)
@@ -87,11 +97,11 @@ def main():
     # Video generation
     image_paths = generate_paths('%s' % IMAGE_PATH)
     audio_paths = generate_paths('%s' % AUDIO_PATH)
-    merge_image_audio(image_paths, audio_paths, '%s' % VIDEO_PATH, script)
-    concat_videos("%s" % VIDEO_PATH)
+    merge_image_audio(image_paths, audio_paths, VIDEO_PATH, script)
+    url = concat_videos(VIDEO_PATH, req_id)
     cleanup()
     print("Video is successfully produced.")
-    return 0
+    return url
 
 
 # Process command line arguments
@@ -102,6 +112,6 @@ def main():
 #         raise Exception("Invalid file type, please add .pdf file")
 # except IndexError:
 #     raise Exception("PLease add .pdf file as argument")
-
-if __name__ == '__main__':
-    main()
+#
+# if __name__ == '__main__':
+#     main()

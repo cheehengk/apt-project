@@ -1,21 +1,14 @@
+import io
 import os
 from langchain import OpenAI
 from langchain.chains.summarize import load_summarize_chain
 from langchain.chains import AnalyzeDocumentChain
 from PyPDF2 import PdfReader
-from dotenv import dotenv_values
 
 from flask_app.src.processor.create_video import generate_paths, get_txt_rank
 
 PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 TEXT_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Texts')
-
-env_vars = dotenv_values(os.path.join(PARENT_PATH, "src/.env"))
-openai_rotational_keys = [env_vars.get("OPENAI_KEY_1"), env_vars.get("OPENAI_KEY_2")]
-
-
-def get_key(key):
-    return openai_rotational_keys[key]
 
 
 def slice_script(script):
@@ -31,7 +24,7 @@ def slice_script(script):
 
 
 def analyse_doc(key):
-    os.environ['OPENAI_API_KEY'] = get_key(key)
+    os.environ['OPENAI_API_KEY'] = key
 
     docs_path = generate_paths('%s' % TEXT_PATH)
     docs_path.sort(key=get_txt_rank)
@@ -51,8 +44,8 @@ def analyse_doc(key):
     return slice_script(script)
 
 
-def extract_pdf(path):
-    pdfReader = PdfReader(path)
+def extract_pdf(file):
+    pdfReader = PdfReader(io.BytesIO(file))
     pages = len(pdfReader.pages)
     print("Number of Pages: ", pages)
 

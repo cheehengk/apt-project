@@ -1,15 +1,18 @@
 import requests
 import os
+
+from dotenv import load_dotenv
 from gtts import gTTS
 from random import randint
-from dotenv import dotenv_values
 
 PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
 AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
 
-env_vars = dotenv_values(os.path.join(PARENT_PATH, "src/.env"))
-pixabay_api_key = env_vars.get("PIXABAY_API_KEY")
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+# dotenv_path = os.path.join(current_dir, '../../../.env')
+# load_dotenv(dotenv_path)
+pixabay_api_key = os.environ.get("PIXABAY_API_KEY")
 
 
 def get_images(keyword_array):
