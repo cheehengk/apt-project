@@ -27,7 +27,7 @@ jobs:
         run: |
           gcloud auth configure-docker --quiet
 
-      - name: Set up environmental variables
+      - name: Build and push Docker images
         env:
           GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
           OPENAI_KEY_1: ${{ secrets.OPENAI_KEY_1 }}
@@ -38,8 +38,6 @@ jobs:
           SQL_HOST: ${{ secrets.SQL_HOST }}
           SQL_PW: ${{ secrets.SQL_PW }}
           SQL_USER: ${{ secrets.SQL_USER }}
-
-      - name: Build and push Docker images
         run: |
           docker-compose up -d
 
