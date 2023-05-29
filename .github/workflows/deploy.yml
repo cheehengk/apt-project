@@ -27,27 +27,38 @@ jobs:
         run: |
           gcloud auth configure-docker --quiet
 
+      - name: Set up environmental variables
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          OPENAI_KEY_1: ${{ secrets.OPENAI_KEY_1 }}
+          OPENAI_KEY_2: ${{ secrets.OPENAI_KEY_2 }}
+          PIXABAY_API_KEY: ${{ secrets.PIXABAY_API_KEY }}
+          SOCKETIO_KEY: ${{ secrets.SOCKETIO_KEY }}
+          SQL_DATABASE: ${{ secrets.SQL_DATABASE }}
+          SQL_HOST: ${{ secrets.SQL_HOST }}
+          SQL_PW: ${{ secrets.SQL_PW }}
+          SQL_USER: ${{ secrets.SQL_USER }}
+
       - name: Build and push Docker images
         run: |
-          docker-compose build
-          docker-compose push
+          docker-compose up -d
 
       - name: Deploy to Google Cloud Run
         run: |
           gcloud run deploy ai-proj-flask \
-            --image gcr.io/apt-ai-project/flask-app \
+            --image gcr.io/apt-ai-project/ai-playground_flask-app:latest \
             --platform managed \
             --region asia-southeast1 \
             --allow-unauthenticated
           
           gcloud run deploy ai-proj-worker \
-            --image gcr.io/apt-ai-project/rq-worker \
+            --image gcr.io/apt-ai-project/ai-playground_rq-worker:latest \
             --platform managed \
             --region asia-southeast1 \
             --allow-unauthenticated
           
           gcloud run deploy ai-proj-redis \
-            --image gcr.io/apt-ai-project/redis \
+            --image gcr.io/apt-ai-project/ai-playground_redis:latest \
             --platform managed \
             --region asia-southeast1 \
             --allow-unauthenticated
