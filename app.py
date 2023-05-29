@@ -1,26 +1,25 @@
 import datetime
 import os
-import shutil
 import time
 from datetime import timedelta
 from random import randint
-from PyPDF2 import PdfReader
-from rq import Queue
-from flask import Flask, render_template, make_response, request
-from werkzeug.utils import secure_filename
-from google.cloud import storage
-import mysql.connector
-from blinker import signal
-from flask_socketio import SocketIO, emit, Namespace
-from dotenv import dotenv_values
-from redis import Redis
 
-env_vars = dotenv_values("flask_app/src/.env")
-sql_host = env_vars.get("SQL_HOST")
-sql_database = env_vars.get("SQL_DATABASE")
-sql_user = env_vars.get("SQL_USER")
-sql_password = env_vars.get("SQL_PW")
-socket_io_key = env_vars.get("SOCKETIO_KEY")
+import mysql.connector
+from PyPDF2 import PdfReader
+from blinker import signal
+from dotenv import load_dotenv
+from flask import Flask, render_template, make_response, request
+from flask_socketio import SocketIO, emit, Namespace
+from google.cloud import storage
+from redis import Redis
+from rq import Queue
+
+# load_dotenv()
+sql_host = os.environ.get("SQL_HOST")
+sql_database = os.environ.get("SQL_DATABASE")
+sql_user = os.environ.get("SQL_USER")
+sql_password = os.environ.get("SQL_PW")
+socket_io_key = os.environ.get("SOCKETIO_KEY")
 
 RQ_FINISHED_STATUS = 'finished'
 RQ_FAILED_STATUS = 'failed'
@@ -93,13 +92,13 @@ def allowed_file(file):
     # try:
     #     pdf = PdfReader(file)
     #     page_count = len(pdf.pages)
+    #     if page_count > 15:
+    #         return False
     # except Exception as e:
     #     print('Cannot read file. Reason: %s' % e)
     #     return False
     #
-    # if page_count > 15:
-    #     return False
-
+    # return True
     return extension_check
 
 
@@ -189,11 +188,9 @@ def error(err):
 def upload_file():
     socketio.emit('reading-file', {'message': 'Reading your file...'})
     f = request.files['file']
+    # f_temp = copy.deepcopy(f)
     if f and allowed_file(f):
         req_id = random_with_N_digits(10)
-        # f.filename = 'user_upload.pdf'
-        # file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename))
-        # f.save(file_path)
 
         pdf_gcs_url = upload_to_gcs(GCS_BUCKET, f, req_id)  # upload_type = 0 for PDF
 

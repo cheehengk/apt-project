@@ -2,8 +2,8 @@ import os
 import string
 import openai
 import requests
+from dotenv import load_dotenv
 from tenacity import retry, wait_random_exponential
-from dotenv import dotenv_values
 from flask_app.src.processor.create_video import generate_paths, merge_image_audio, concat_videos
 from flask_app.src.llm.document_analyser import extract_pdf, analyse_doc
 from flask_app.src.processor.file_cleaner import cleanup
@@ -14,8 +14,10 @@ IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
 AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
 VIDEO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Videos')
 
-env_vars = dotenv_values('.env')
-openai_rotational_keys = [env_vars.get('OPENAI_KEY_1'), env_vars.get('OPENAI_KEY_2')]
+# current_dir = os.path.dirname(os.path.abspath(__file__))
+# dotenv_path = os.path.join(current_dir, '../../.env')
+# load_dotenv(dotenv_path)
+openai_rotational_keys = [os.environ.get('OPENAI_KEY_1'), os.environ.get('OPENAI_KEY_2')]
 number_of_api_keys = 2
 
 
@@ -72,7 +74,7 @@ def main(payload):
     extract_pdf(file)
 
     print("ANALYZING...")
-    script = analyse_doc(current_openai_key)
+    script = analyse_doc(get_key(current_openai_key))
     current_openai_key = rotate_key(current_openai_key)
 
     script_length = len(script)
