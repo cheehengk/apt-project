@@ -35,19 +35,19 @@ jobs:
       - name: Deploy to Google Cloud Run
         run: |
           gcloud run deploy ai-proj-flask \
-            --image gcr.io/apt-ai-project/flask-app:latest \
+            --image gcr.io/apt-ai-project/flask-app \
             --platform managed \
             --region asia-southeast1 \
             --allow-unauthenticated
           
           gcloud run deploy ai-proj-worker \
-            --image gcr.io/apt-ai-project/rq-worker:latest \
+            --image gcr.io/apt-ai-project/rq-worker \
             --platform managed \
             --region asia-southeast1 \
             --allow-unauthenticated
           
           gcloud run deploy ai-proj-redis \
-            --image gcr.io/apt-ai-project/redis:latest \
+            --image gcr.io/apt-ai-project/redis \
             --platform managed \
             --region asia-southeast1 \
             --allow-unauthenticated
