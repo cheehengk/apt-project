@@ -21,7 +21,7 @@ jobs:
         with:
           project_id: ai-pdf-vid
           service_account_email: ${{ secrets.GCP_EMAIL }}
-          service_account_key: ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
 
       - name: Configure Docker login for Google Cloud Container Registry
