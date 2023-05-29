@@ -37,17 +37,14 @@ jobs:
           gcloud run deploy ai-proj-flask \
             --image gcr.io/ai-pdf-vid/flask-app:latest \
             --platform managed \
-            --region asia-southeast1 \
-            --allow-unauthenticated
+            --region asia-southeast1
           
           gcloud run deploy ai-proj-worker \
             --image gcr.io/ai-pdf-vid/rq-worker:latest \
             --platform managed \
-            --region asia-southeast1 \
-            --allow-unauthenticated
+            --region asia-southeast1
           
           gcloud run deploy ai-proj-redis \
             --image gcr.io/ai-pdf-vid/redis:latest \
             --platform managed \
-            --region asia-southeast1 \
-            --allow-unauthenticated
+            --region asia-southeast1
