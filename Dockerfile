@@ -21,5 +21,3 @@ COPY . /app
 
 # Copy restriction policy to ImageMagick
 COPY policy.xml /etc/ImageMagick-6/
-
-CMD ["echo", "This is a placeholder command"]
