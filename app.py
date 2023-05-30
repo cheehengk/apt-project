@@ -5,9 +5,7 @@ from datetime import timedelta
 from random import randint
 
 import mysql.connector
-from PyPDF2 import PdfReader
 from blinker import signal
-from dotenv import load_dotenv
 from flask import Flask, render_template, make_response, request
 from flask_socketio import SocketIO, emit, Namespace
 from google.cloud import storage

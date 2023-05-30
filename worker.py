@@ -3,7 +3,6 @@ import os
 from redis import Redis
 from rq import Worker, Queue, Connection
 from flask_app.src.scripter import main
-from dotenv import load_dotenv
 
 # load_dotenv()
 redis_host = os.environ.get("REDIS_HOST")

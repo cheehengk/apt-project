@@ -2,7 +2,6 @@ import os
 import string
 import openai
 import requests
-from dotenv import load_dotenv
 from tenacity import retry, wait_random_exponential
 from flask_app.src.processor.create_video import generate_paths, merge_image_audio, concat_videos
 from flask_app.src.llm.document_analyser import extract_pdf, analyse_doc
