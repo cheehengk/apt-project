@@ -25,7 +25,7 @@ jobs:
 
       - name: Configure Docker login for Google Cloud Container Registry
         run: |
-          gcloud auth configure-docker
+          gcloud auth application-default print-access-token | docker login https://gcr.io -u oauth2accesstoken --password-stdin
 
       - name: Get .env file from Github Secrets
         shell: bash
