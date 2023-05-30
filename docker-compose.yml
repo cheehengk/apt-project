@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
-    command: python app.py
+    command: flask run --port=5000
 #    environment:
 #      - RQ_REDIS_URL=redis://redis:6379/0
 #      - GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
