@@ -27,6 +27,11 @@ jobs:
         run: |
           gcloud auth configure-docker
 
+      - name: Get .env file from Github Secrets
+        shell: bash
+        run: |
+          echo ${{ secrets.ENV }} | base64 -d > .env
+
       - name: Build and push Docker images
         run: |
           docker-compose build

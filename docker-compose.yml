@@ -8,17 +8,17 @@ services:
     ports:
       - "5000:5000"
     command: python app.py
-    environment:
-      - RQ_REDIS_URL=redis://redis:6379/0
-      - GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-      - OPENAI_KEY_1=${{ secrets.OPENAI_KEY_1 }}
-      - OPENAI_KEY_2=${{ secrets.OPENAI_KEY_2 }}
-      - PIXABAY_API_KEY=${{ secrets.PIXABAY_API_KEY }}
-      - SOCKETIO_KEY=${{ secrets.SOCKETIO_KEY }}
-      - SQL_DATABASE=${{ secrets.SQL_DATABASE }}
-      - SQL_HOST=${{ secrets.SQL_HOST }}
-      - SQL_PW=${{ secrets.SQL_PW }}
-      - SQL_USER=${{ secrets.SQL_USER }}
+#    environment:
+#      - RQ_REDIS_URL=redis://redis:6379/0
+#      - GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+#      - OPENAI_KEY_1=${{ secrets.OPENAI_KEY_1 }}
+#      - OPENAI_KEY_2=${{ secrets.OPENAI_KEY_2 }}
+#      - PIXABAY_API_KEY=${{ secrets.PIXABAY_API_KEY }}
+#      - SOCKETIO_KEY=${{ secrets.SOCKETIO_KEY }}
+#      - SQL_DATABASE=${{ secrets.SQL_DATABASE }}
+#      - SQL_HOST=${{ secrets.SQL_HOST }}
+#      - SQL_PW=${{ secrets.SQL_PW }}
+#      - SQL_USER=${{ secrets.SQL_USER }}
     depends_on:
       - redis
 
@@ -28,17 +28,17 @@ services:
       context: .
       dockerfile: Dockerfile
     command: python worker.py
-    environment:
-      - RQ_REDIS_URL=redis://redis:6379/0
-      - GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
-      - OPENAI_KEY_1=${{ secrets.OPENAI_KEY_1 }}
-      - OPENAI_KEY_2=${{ secrets.OPENAI_KEY_2 }}
-      - PIXABAY_API_KEY=${{ secrets.PIXABAY_API_KEY }}
-      - SOCKETIO_KEY=${{ secrets.SOCKETIO_KEY }}
-      - SQL_DATABASE=${{ secrets.SQL_DATABASE }}
-      - SQL_HOST=${{ secrets.SQL_HOST }}
-      - SQL_PW=${{ secrets.SQL_PW }}
-      - SQL_USER=${{ secrets.SQL_USER }}
+#    environment:
+#      - RQ_REDIS_URL=redis://redis:6379/0
+#      - GOOGLE_APPLICATION_CREDENTIALS=${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}
+#      - OPENAI_KEY_1=${{ secrets.OPENAI_KEY_1 }}
+#      - OPENAI_KEY_2=${{ secrets.OPENAI_KEY_2 }}
+#      - PIXABAY_API_KEY=${{ secrets.PIXABAY_API_KEY }}
+#      - SOCKETIO_KEY=${{ secrets.SOCKETIO_KEY }}
+#      - SQL_DATABASE=${{ secrets.SQL_DATABASE }}
+#      - SQL_HOST=${{ secrets.SQL_HOST }}
+#      - SQL_PW=${{ secrets.SQL_PW }}
+#      - SQL_USER=${{ secrets.SQL_USER }}
     depends_on:
       - redis
 
