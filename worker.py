@@ -2,7 +2,7 @@ import os
 from flask import Flask
 from redis import Redis
 from rq import Worker, Queue, Connection
-from src.scripter import main
+from flask_app.src.scripter import main
 
 
 app = Flask(__name__)
@@ -31,4 +31,4 @@ def process_tasks():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8080)
+    app.run(host='0.0.0.0', port=5000)
