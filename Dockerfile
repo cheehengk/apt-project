@@ -19,6 +19,7 @@ ENV FLASK_RUN_HOST 0.0.0.0
 ENV PORT 5000
 ENV HOST 0.0.0.0
 EXPOSE 5000
+EXPOSE 6379
 
 # Copy the app code into the container
 COPY . /app
