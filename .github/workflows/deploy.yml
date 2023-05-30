@@ -50,9 +50,3 @@ jobs:
             --platform managed \
             --region asia-southeast1 \
             --allow-unauthenticated
-          
-          gcloud run deploy ai-proj-redis \
-            --image gcr.io/apt-ai-project/redis:latest \
-            --platform managed \
-            --region asia-southeast1 \
-            --allow-unauthenticated

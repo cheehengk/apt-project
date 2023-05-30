@@ -12,7 +12,12 @@ redis_pw = os.environ.get("REDIS_PW")
 listen = ['default']
 
 if __name__ == '__main__':
-    redis_conn = Redis(host='redis', port=6379, db=0)
+    redis_conn = Redis(
+        host=redis_host,
+        port=int(redis_port),
+        password=redis_pw
+    )
+    # redis_conn = Redis(host='redis', port=6379, db=0)
     with Connection(connection=redis_conn):
         worker = Worker(map(Queue, listen))
 
