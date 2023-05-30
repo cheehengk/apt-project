@@ -27,4 +27,4 @@ COPY . /app
 # Copy restriction policy to ImageMagick
 COPY policy.xml /etc/ImageMagick-6/
 
-CMD ["python", "worker.py"]
+CMD ["flask", "run"]
