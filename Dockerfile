@@ -6,8 +6,7 @@ WORKDIR /app
 
 # Install system dependencies
 #RUN apt-get update && apt-get install -y redis-server
-RUN apt-get update && apt-get install -y ffmpeg libavcodec-extra
-RUN apt-get update && apt-get install -y imagemagick
+RUN apt-get update && apt-get install -y ffmpeg libavcodec-extra imagemagick
 
 # Copy the requirements file
 COPY requirements.txt .
@@ -27,4 +26,4 @@ COPY . /app
 # Copy restriction policy to ImageMagick
 COPY policy.xml /etc/ImageMagick-6/
 
-CMD ["echo", "This is a placeholder command"]
+CMD ["flask", "run"]
