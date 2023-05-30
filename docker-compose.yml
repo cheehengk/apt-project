@@ -1,7 +1,7 @@
 version: '3'
 services:
   flask-app:
-    image: flask-app
+    image: gcr.io/apt-ai-project/flask-app
     build:
       context: .
       dockerfile: Dockerfile
@@ -23,7 +23,7 @@ services:
       - redis
 
   rq-worker:
-    image: rq-worker
+    image: gcr.io/apt-ai-project/rq-worker
     build:
       context: .
       dockerfile: Dockerfile
