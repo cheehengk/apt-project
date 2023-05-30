@@ -32,7 +32,7 @@ socketio = SocketIO(app)
 signal_namespace = Namespace()
 
 # DO NOT CHANGE!!!
-GCS_BUCKET = "ai-proj"
+GCS_BUCKET = "artifacts.apt-ai-project.appspot.com"
 PDF_FOLDER = "PDFs"
 VIDEO_FOLDER = "VIDEOs"
 # DO NOT CHANGE!!!
