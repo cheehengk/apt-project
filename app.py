@@ -1,25 +1,29 @@
 import datetime
 import os
+import shutil
 import time
 from datetime import timedelta
 from random import randint
-
-import mysql.connector
 from PyPDF2 import PdfReader
-from blinker import signal
-from dotenv import load_dotenv
-from flask import Flask, render_template, make_response, request
-from flask_socketio import SocketIO, emit, Namespace
-from google.cloud import storage
-from redis import Redis
 from rq import Queue
+from flask import Flask, render_template, make_response, request
+from werkzeug.utils import secure_filename
+from google.cloud import storage
+import mysql.connector
+from blinker import signal
+from flask_socketio import SocketIO, emit, Namespace
+from dotenv import dotenv_values
+from redis import Redis
 
-# load_dotenv()
-sql_host = os.environ.get("SQL_HOST")
-sql_database = os.environ.get("SQL_DATABASE")
-sql_user = os.environ.get("SQL_USER")
-sql_password = os.environ.get("SQL_PW")
-socket_io_key = os.environ.get("SOCKETIO_KEY")
+env_vars = dotenv_values(".env")
+sql_host = env_vars.get("SQL_HOST")
+sql_database = env_vars.get("SQL_DATABASE")
+sql_user = env_vars.get("SQL_USER")
+sql_password = env_vars.get("SQL_PW")
+socket_io_key = env_vars.get("SOCKETIO_KEY")
+redis_host = env_vars.get("REDIS_HOST")
+redis_port = env_vars.get("REDIS_PORT")
+redis_pw = env_vars.get("REDIS_PW")
 
 RQ_FINISHED_STATUS = 'finished'
 RQ_FAILED_STATUS = 'failed'
@@ -34,7 +38,7 @@ socketio = SocketIO(app)
 signal_namespace = Namespace()
 
 # DO NOT CHANGE!!!
-GCS_BUCKET = "ai-proj"
+GCS_BUCKET = "artifacts.apt-ai-project.appspot.com"
 PDF_FOLDER = "PDFs"
 VIDEO_FOLDER = "VIDEOs"
 # DO NOT CHANGE!!!
@@ -43,7 +47,11 @@ VIDEO_FOLDER = "VIDEOs"
 
 sql_insertion_signal = signal('sql_insertion')
 
-redis_conn = Redis(host='redis', port=6379, db=0)
+redis_conn = Redis(
+        host=redis_host,
+        port=int(redis_port),
+        password=redis_pw
+)
 q = Queue(connection=redis_conn)
 
 wait_messages = [
@@ -92,13 +100,13 @@ def allowed_file(file):
     # try:
     #     pdf = PdfReader(file)
     #     page_count = len(pdf.pages)
-    #     if page_count > 15:
-    #         return False
     # except Exception as e:
     #     print('Cannot read file. Reason: %s' % e)
     #     return False
     #
-    # return True
+    # if page_count > 15:
+    #     return False
+
     return extension_check
 
 
@@ -188,9 +196,11 @@ def error(err):
 def upload_file():
     socketio.emit('reading-file', {'message': 'Reading your file...'})
     f = request.files['file']
-    # f_temp = copy.deepcopy(f)
     if f and allowed_file(f):
         req_id = random_with_N_digits(10)
+        # f.filename = 'user_upload.pdf'
+        # file_path = os.path.join(app.config['UPLOAD_FOLDER'], secure_filename(f.filename))
+        # f.save(file_path)
 
         pdf_gcs_url = upload_to_gcs(GCS_BUCKET, f, req_id)  # upload_type = 0 for PDF
 
@@ -234,7 +244,7 @@ def run(details):
             socketio.emit('error', {'message': 'Conversion job failed!'})
             return "conversion-job-failure"
         time.sleep(10)
-        socketio.emit('conversion-message', {'message': str(task.get_status())})
+        socketio.emit('conversion-message', {'message': random_message()})
 
     video_gcs_url = task.result
 
