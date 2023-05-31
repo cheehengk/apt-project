@@ -10,8 +10,6 @@ services:
     environment:
       - RQ_REDIS_URL=redis://redis:6379/0
 #      - GOOGLE_APPLICATION_CREDENTIALS=google_creds.json
-    depends_on:
-      - redis
 
   rq-worker:
     build:
@@ -21,8 +19,3 @@ services:
     environment:
       - RQ_REDIS_URL=redis://redis:6379/0
 #      - GOOGLE_APPLICATION_CREDENTIALS=google_creds.json
-    depends_on:
-      - redis
-
-  redis:
-    image: redis
