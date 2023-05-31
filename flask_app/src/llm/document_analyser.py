@@ -25,7 +25,6 @@ def slice_script(script):
 
 def analyse_doc(key):
     os.environ['OPENAI_API_KEY'] = key
-    print(key)
     docs_path = generate_paths('%s' % TEXT_PATH)
     docs_path.sort(key=get_txt_rank)
 
