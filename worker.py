@@ -3,7 +3,7 @@ from rq import Worker, Queue, Connection
 from flask_app.src.scripter import main
 from dotenv import dotenv_values
 
-env_vars = dotenv_values("flask_app/src/.env")
+env_vars = dotenv_values(".env")
 redis_host = env_vars.get("REDIS_HOST")
 redis_port = env_vars.get("REDIS_PORT")
 redis_pw = env_vars.get("REDIS_PW")
@@ -11,7 +11,11 @@ redis_pw = env_vars.get("REDIS_PW")
 listen = ['default']
 
 if __name__ == '__main__':
-    redis_conn = Redis(host='redis', port=6379, db=0)
+    redis_conn = Redis(
+        host=redis_host,
+        port=int(redis_port),
+        password=redis_pw
+    )
     with Connection(connection=redis_conn):
         worker = Worker(map(Queue, listen))
 
