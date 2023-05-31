@@ -15,7 +15,7 @@ from flask_socketio import SocketIO, emit, Namespace
 from dotenv import dotenv_values
 from redis import Redis
 
-env_vars = dotenv_values("flask_app/src/.env")
+env_vars = dotenv_values(".env")
 sql_host = env_vars.get("SQL_HOST")
 sql_database = env_vars.get("SQL_DATABASE")
 sql_user = env_vars.get("SQL_USER")
@@ -237,7 +237,7 @@ def run(details):
             socketio.emit('error', {'message': 'Conversion job failed!'})
             return "conversion-job-failure"
         time.sleep(10)
-        socketio.emit('conversion-message', {'message': str(task.get_status())})
+        socketio.emit('conversion-message', {'message': random_message()})
 
     video_gcs_url = task.result
 

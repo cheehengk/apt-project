@@ -13,9 +13,11 @@ PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
 AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
 VIDEO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Videos')
+ENV_PATH = os.path.join(PARENT_PATH, '..')
 
-env_vars = dotenv_values('.env')
+env_vars = dotenv_values(os.path.join(ENV_PATH, '.env'))
 openai_rotational_keys = [env_vars.get('OPENAI_KEY_1'), env_vars.get('OPENAI_KEY_2')]
+pixabay_api_key = env_vars.get('PIXABAY_API_KEY')
 number_of_api_keys = 2
 
 
@@ -72,7 +74,7 @@ def main(payload):
     extract_pdf(file)
 
     print("ANALYZING...")
-    script = analyse_doc(current_openai_key)
+    script = analyse_doc(get_key(current_openai_key))
     current_openai_key = rotate_key(current_openai_key)
 
     script_length = len(script)
@@ -87,7 +89,7 @@ def main(payload):
         # time.sleep(10)
 
     print("GETTING IMAGES...")
-    get_images(keyword)
+    get_images(keyword, pixabay_api_key)
     print("GENERATING AUDIO...")
     get_audios(script)
 

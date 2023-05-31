@@ -8,11 +8,8 @@ PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
 AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
 
-env_vars = dotenv_values(os.path.join(PARENT_PATH, "src/.env"))
-pixabay_api_key = env_vars.get("PIXABAY_API_KEY")
 
-
-def get_images(keyword_array):
+def get_images(keyword_array, pixabay_api_key):
     for index, key in enumerate(keyword_array):
         url = "https://pixabay.com/api/?key=" + pixabay_api_key + "&q=" + key + "&image_type=photo"
         image_result = requests.get(url).json()
