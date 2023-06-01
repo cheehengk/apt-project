@@ -9,7 +9,9 @@ services:
     command: python app.py
     environment:
       - RQ_REDIS_URL=redis://redis:6379/0
-#      - GOOGLE_APPLICATION_CREDENTIALS=google_creds.json
+      - GOOGLE_APPLICATION_CREDENTIALS=google_creds.json
+    depends_on:
+      - redis
 
   rq-worker:
     build:
@@ -18,4 +20,9 @@ services:
     command: python worker.py
     environment:
       - RQ_REDIS_URL=redis://redis:6379/0
-#      - GOOGLE_APPLICATION_CREDENTIALS=google_creds.json
+      - GOOGLE_APPLICATION_CREDENTIALS=google_creds.json
+    depends_on:
+      - redis
+
+  redis:
+    image: redis

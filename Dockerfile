@@ -16,9 +16,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 #RUN apt-get update && apt-get install -y supervisor
 
-ENV PORT 5000
+ENV PORT 8080
 ENV HOST 0.0.0.0
-EXPOSE 5000
+EXPOSE 8080
 
 ENV GOOGLE_APPLICATION_CREDENTIALS /app/google_creds.json
 
@@ -28,4 +28,4 @@ COPY . /app
 # Copy restriction policy to ImageMagick
 COPY policy.xml /etc/ImageMagick-6/
 
-CMD python app.py
+CMD python worker.py

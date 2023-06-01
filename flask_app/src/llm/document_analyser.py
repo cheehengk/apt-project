@@ -4,6 +4,7 @@ from langchain import OpenAI
 from langchain.chains.summarize import load_summarize_chain
 from langchain.chains import AnalyzeDocumentChain
 from PyPDF2 import PdfReader
+from tenacity import retry, wait_random_exponential
 
 from flask_app.src.processor.create_video import generate_paths, get_txt_rank
 
@@ -23,6 +24,7 @@ def slice_script(script):
     return slices
 
 
+@retry(wait=wait_random_exponential(min=1, max=60))
 def analyse_doc(key):
     os.environ['OPENAI_API_KEY'] = key
     docs_path = generate_paths('%s' % TEXT_PATH)

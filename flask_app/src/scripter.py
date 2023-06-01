@@ -16,9 +16,9 @@ VIDEO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Videos')
 ENV_PATH = os.path.join(PARENT_PATH, '..')
 
 env_vars = dotenv_values(os.path.join(ENV_PATH, '.env'))
-openai_rotational_keys = [env_vars.get('OPENAI_KEY_1'), env_vars.get('OPENAI_KEY_2')]
+openai_rotational_keys = [env_vars.get('OPENAI_KEY_1')]
 pixabay_api_key = env_vars.get('PIXABAY_API_KEY')
-number_of_api_keys = 2
+number_of_api_keys = 1
 
 
 def get_key(key):
@@ -45,18 +45,20 @@ def strip_punctuations(text):
 @retry(wait=wait_random_exponential(min=1, max=60))
 def generate_keyword(text_data, key):
     openai.api_key = get_key(key)
-    prompt = "Identify an exactly one word descriptive noun which is found or inferred from this piece of text: " + \
+    prompt = "Identify an exactly one word descriptive noun, longer than 3 letters, which is found or inferred from " \
+             "this piece of text: " + \
              text_data
 
-    response = openai.ChatCompletion.create(
-        model="gpt-3.5-turbo",
-        messages=[
-            {"role": "user",
-             "content": prompt}
-        ],
+    response = openai.Completion.create(
+        model="text-davinci-003",
+        # messages=[
+        #     {"role": "user",
+        #      "content": input_prompt}
+        # ],
+        prompt=prompt,
         temperature=0
     )
-    output = strip_punctuations(response.choices[0].message.content)
+    output = strip_punctuations(response.choices[0].text)
     return output
 
 
