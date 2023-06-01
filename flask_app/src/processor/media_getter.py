@@ -2,7 +2,6 @@ import requests
 import os
 from gtts import gTTS
 from random import randint
-from dotenv import dotenv_values
 
 PARENT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 IMAGE_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Images')
@@ -21,14 +20,14 @@ def get_images(keyword_array, pixabay_api_key):
                 image_url = response[rand]['largeImageURL']
             except IndexError:
                 image_url = "https://pixabay.com/get" \
-                            "/gcfcafd5ec3dc85b8b24b0da96ec1b54b078ee9e9a07aefee345f7d885bf5228f15b848036c51797d6" \
-                            "d9313e24faeb4972c3d796595133ad3541936b991568d5b_1280.jpg"
+                            "/gd2c344ba85997dade4022a2421b67ea1eb0e5b25dfb6bb41dba4fb23fab8d81626f2f349dc7f946aea9758ae354358cd22f1dfa8fd1c8e3f1f2d1f425733ef5a_1280.jpg"
         else:
             image_url = "https://pixabay.com/get" \
-                        "/gcfcafd5ec3dc85b8b24b0da96ec1b54b078ee9e9a07aefee345f7d885bf5228f15b848036c51797d6d931" \
-                        "3e24faeb4972c3d796595133ad3541936b991568d5b_1280.jpg"
+                        "/gd2c344ba85997dade4022a2421b67ea1eb0e5b25dfb6bb41dba4fb23fab8d81626f2f349dc7f946aea9758ae354358cd22f1dfa8fd1c8e3f1f2d1f425733ef5a_1280.jpg"
 
         image_response = requests.get(image_url)
+
+        print(image_response)
         if image_response.status_code:
             filepath = IMAGE_PATH + "/" + str(index) + ".jpg"
             fp = open(filepath, 'wb')

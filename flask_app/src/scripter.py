@@ -45,7 +45,8 @@ def strip_punctuations(text):
 @retry(wait=wait_random_exponential(min=1, max=60))
 def generate_keyword(text_data, key):
     openai.api_key = get_key(key)
-    prompt = "Identify an exactly one word descriptive noun which is found or inferred from this piece of text: " + \
+    prompt = "Identify an exactly one word descriptive noun, longer than 3 letters, which is found or inferred from " \
+             "this piece of text: " + \
              text_data
 
     response = openai.Completion.create(
