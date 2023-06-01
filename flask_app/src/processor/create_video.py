@@ -11,7 +11,7 @@ from google.cloud import storage
 from datetime import timedelta
 
 OUTPUT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
-GCS_BUCKET = "ai-proj"
+GCS_BUCKET = "artifacts.apt-ai-project.appspot.com"
 VIDEO_FOLDER = "VIDEOs"
 
 

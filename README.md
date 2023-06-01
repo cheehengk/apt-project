@@ -1,13 +1,26 @@
 ## Convert your PDF documents into informal, educational videos.
 
+### Project Description
+
+Project involves converting PDF documents into concise education (slide-show based) videos. 
+Usage of OpenAI API for summarising PDF content. Video produced using Google Text-to-Speech, royalty-free images from Pixabay and MoviePy for editing.
+---
 ### Getting Started
 1. Clone the Repo ```git clone https://github.com/cheehengk/ai-playground.git```
 2. Move into the directory ```cd ai-playground```
 3. Install Requirements ```pip install -r requirements.txt```
-4. Copy over secret keys file into the directory: ***flask_app/src***
-5. Copy over Google Credentials file into the directory: ***flask_app***
-6. Run Redis Server ```redis-server```
-7. On another terminal, move into flask_app directory ```cd flask_app```
-8. Run worker.py file
-9. Run flask app ```GOOGLE_APPLICATION_CREDENTIALS=google_creds.json flask run```
-10. App should be running on ```http://127.0.0.1:5000```
+4. Copy over secret keys file into root directory
+5. Copy over Google Credentials file into root directory
+
+*Running on Terminal*
+1. Run worker.py file ```python worker.py```
+2. Run flask app ```GOOGLE_APPLICATION_CREDENTIALS=google_creds.json flask run```
+
+*Docker*
+1. Install Docker Daemon
+2. Run ```docker-compose up```
+    
+App should be running on ```http://127.0.0.1:5000```
+
+---
+Contact repository owner for link to live deployment and required resources for local testing. 

@@ -1,19 +1,21 @@
 version: '3'
 services:
   flask-app:
-    image: gcr.io/apt-ai-project/flask-app
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - "5000:5000"
     command: python app.py
+    environment:
+      - RQ_REDIS_URL=redis://redis:6379/0
+#      - GOOGLE_APPLICATION_CREDENTIALS=google_creds.json
 
   rq-worker:
-    image: gcr.io/apt-ai-project/rq-worker
     build:
       context: .
       dockerfile: Dockerfile
-    ports:
-      - "8080:8080"
-    command: python flask_app/worker.py
+    command: python worker.py
+    environment:
+      - RQ_REDIS_URL=redis://redis:6379/0
+#      - GOOGLE_APPLICATION_CREDENTIALS=google_creds.json

@@ -6,7 +6,8 @@ WORKDIR /app
 
 # Install system dependencies
 #RUN apt-get update && apt-get install -y redis-server
-RUN apt-get update && apt-get install -y ffmpeg libavcodec-extra imagemagick
+RUN apt-get update && apt-get install -y ffmpeg libavcodec-extra
+RUN apt-get update && apt-get install -y imagemagick
 
 # Copy the requirements file
 COPY requirements.txt .
@@ -15,11 +16,11 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 #RUN apt-get update && apt-get install -y supervisor
 
-ENV FLASK_RUN_HOST 0.0.0.0
 ENV PORT 5000
 ENV HOST 0.0.0.0
 EXPOSE 5000
-EXPOSE 8080
+
+ENV GOOGLE_APPLICATION_CREDENTIALS /app/google_creds.json
 
 # Copy the app code into the container
 COPY . /app
@@ -27,4 +28,4 @@ COPY . /app
 # Copy restriction policy to ImageMagick
 COPY policy.xml /etc/ImageMagick-6/
 
-CMD ["flask", "run"]
+CMD python app.py
