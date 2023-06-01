@@ -1,19 +1,19 @@
 version: '3'
 services:
-  flask-app:
+  flask-app-test:
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - "5000:5000"
+      - "5050:5050"
     command: python app.py
     environment:
       - RQ_REDIS_URL=redis://redis:6379/0
       - GOOGLE_APPLICATION_CREDENTIALS=google_creds.json
     depends_on:
-      - redis
+      - redis-test
 
-  rq-worker:
+  rq-worker-test:
     build:
       context: .
       dockerfile: Dockerfile
@@ -22,7 +22,7 @@ services:
       - RQ_REDIS_URL=redis://redis:6379/0
       - GOOGLE_APPLICATION_CREDENTIALS=google_creds.json
     depends_on:
-      - redis
+      - redis-test
 
-  redis:
+  redis-test:
     image: redis

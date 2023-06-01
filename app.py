@@ -67,6 +67,7 @@ wait_messages = [
     "Stay tuned! We'll be done shortly."
 ]
 
+global_url_returned = None
 
 def create_sql_connection():
     print("establishing sql connection")
@@ -209,7 +210,7 @@ def upload_file():
             pkey = upload_initial_sql_data(pdf_gcs_url)
             if not pkey == 0:
                 sql_insertion_signal.send([req_id, pkey, pdf_gcs_url])
-                return "Success"
+                return global_url_returned
             else:
                 socketio.emit('error', {'message': 'SQL Insertion Error, please try again later!'})
                 return "sql-insertion-failure"
@@ -251,7 +252,9 @@ def run(details):
     if video_gcs_url is not None:
         if update_sql_data(pkey, video_gcs_url, str(task.id)):
             socketio.emit('success', {'message': video_gcs_url})
-            return 'success'
+            global global_url_returned
+            global_url_returned = video_gcs_url
+            return video_gcs_url
         else:
             socketio.emit('error', {'message': 'SQL Insertion Error, please try again later!'})
             return "sql-insertion-failure"
@@ -263,4 +266,4 @@ def run(details):
 sql_insertion_signal.connect(run)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5050)
