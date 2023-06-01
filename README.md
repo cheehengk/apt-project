@@ -1,7 +1,6 @@
 ## Convert your PDF documents into informal, educational videos.
 
 ### Project Description
-
 Project involves converting PDF documents into concise education (slide-show based) videos. 
 Usage of OpenAI API for summarising PDF content. Video produced using Google Text-to-Speech, royalty-free images from Pixabay and MoviePy for editing.
 ---
