@@ -3,7 +3,7 @@ import string
 import openai
 import requests
 from tenacity import retry, wait_random_exponential
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 from flask_app.src.processor.create_video import generate_paths, merge_image_audio, concat_videos
 from flask_app.src.llm.document_analyser import extract_pdf, analyse_doc
 from flask_app.src.processor.file_cleaner import cleanup
@@ -15,9 +15,9 @@ AUDIO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Audios')
 VIDEO_PATH = os.path.join(PARENT_PATH, 'src/temp_assets/Videos')
 ENV_PATH = os.path.join(PARENT_PATH, '..')
 
-env_vars = dotenv_values(os.path.join(ENV_PATH, '.env'))
-openai_rotational_keys = [env_vars.get('OPENAI_KEY_1')]
-pixabay_api_key = env_vars.get('PIXABAY_API_KEY')
+load_dotenv()
+openai_rotational_keys = [os.getenv('OPENAI_KEY_1')]
+pixabay_api_key = os.getenv('PIXABAY_API_KEY')
 number_of_api_keys = 1
 
 

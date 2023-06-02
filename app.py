@@ -1,10 +1,13 @@
+import base64
 import datetime
+import json
 import os
 import shutil
 import time
 from datetime import timedelta
 from random import randint
 from PyPDF2 import PdfReader
+from google.oauth2 import service_account
 from rq import Queue
 from flask import Flask, render_template, make_response, request
 from werkzeug.utils import secure_filename
@@ -12,18 +15,21 @@ from google.cloud import storage
 import mysql.connector
 from blinker import signal
 from flask_socketio import SocketIO, emit, Namespace
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 from redis import Redis
+from google.oauth2.credentials import Credentials
 
-env_vars = dotenv_values(".env")
-sql_host = env_vars.get("SQL_HOST")
-sql_database = env_vars.get("SQL_DATABASE")
-sql_user = env_vars.get("SQL_USER")
-sql_password = env_vars.get("SQL_PW")
-socket_io_key = env_vars.get("SOCKETIO_KEY")
-redis_host = env_vars.get("REDIS_HOST")
-redis_port = env_vars.get("REDIS_PORT")
-redis_pw = env_vars.get("REDIS_PW")
+
+load_dotenv()
+sql_host = os.getenv("SQL_HOST")
+sql_database = os.getenv("SQL_DATABASE")
+sql_user = os.getenv("SQL_USER")
+sql_password = os.getenv("SQL_PW")
+socket_io_key = os.getenv("SOCKETIO_KEY")
+redis_host = os.getenv("REDIS_HOST")
+redis_port = os.getenv("REDIS_PORT")
+redis_pw = os.getenv("REDIS_PW")
+google_raw = os.getenv("GOOGLE_CREDENTIALS")
 
 RQ_FINISHED_STATUS = 'finished'
 RQ_FAILED_STATUS = 'failed'
@@ -130,9 +136,12 @@ def random_with_N_digits(n):
 
 
 def upload_to_gcs(bucket_name, file, req_id):
+    google_creds = base64.b64decode(google_raw)
+    json_key = json.loads(google_creds)
+    credentials = service_account.Credentials.from_service_account_info(json_key)
     FOLDER = PDF_FOLDER
     EXT = '.pdf'
-    storage_client = storage.Client()
+    storage_client = storage.Client(credentials=credentials)
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(FOLDER + '/' + str(req_id) + EXT)
     blob.upload_from_file(file)
@@ -266,4 +275,5 @@ def run(details):
 sql_insertion_signal.connect(run)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    api_port = os.getenv('API_PORT')
+    app.run(host='0.0.0.0', port=api_port)

@@ -1,6 +1,9 @@
+import base64
+import json
 import os
 import shutil
 
+from google.oauth2 import service_account
 from moviepy.editor import AudioFileClip, ImageClip
 from moviepy.video.VideoClip import TextClip
 from moviepy.video.compositing.CompositeVideoClip import CompositeVideoClip
@@ -13,6 +16,7 @@ from datetime import timedelta
 OUTPUT_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '../..'))
 GCS_BUCKET = "artifacts.apt-ai-project.appspot.com"
 VIDEO_FOLDER = "VIDEOs"
+google_raw = os.getenv("GOOGLE_CREDENTIALS")
 
 
 def get_img_aud_rank(filename):
@@ -76,9 +80,12 @@ def generate_paths(path):
 
 
 def upload_to_gcs(bucket_name, file, req_id):
+    google_creds = base64.b64decode(google_raw)
+    json_key = json.loads(google_creds)
+    credentials = service_account.Credentials.from_service_account_info(json_key)
     FOLDER = VIDEO_FOLDER
     EXT = '.mp4'
-    storage_client = storage.Client()
+    storage_client = storage.Client(credentials=credentials)
     bucket = storage_client.bucket(bucket_name)
     blob = bucket.blob(FOLDER + '/' + str(req_id) + EXT)
     blob.upload_from_filename(file)
