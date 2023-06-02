@@ -10,7 +10,6 @@ RUN apt-get update && apt-get install -y ffmpeg libavcodec-extra
 RUN apt-get update && apt-get install -y imagemagick
 
 # Copy the requirements file
-RUN echo "newimage"
 COPY requirements.txt .
 
 # Install the required dependencies
