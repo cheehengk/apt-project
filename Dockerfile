@@ -17,9 +17,9 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 #RUN apt-get update && apt-get install -y supervisor
 
-#ENV PORT 5050
-#ENV HOST 0.0.0.0
-#EXPOSE 5050
+ENV PORT 5050
+ENV HOST 0.0.0.0
+EXPOSE 5050
 
 # Copy the app code into the container
 COPY . .
@@ -32,4 +32,4 @@ RUN mkdir -p flask_app/local_video_store
 # Copy restriction policy to ImageMagick
 COPY policy.xml /etc/ImageMagick-6/
 
-CMD python worker.py
+CMD python app.py
