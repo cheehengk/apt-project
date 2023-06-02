@@ -266,4 +266,5 @@ def run(details):
 sql_insertion_signal.connect(run)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5050)
+    api_port = os.getenv('API_PORT')
+    app.run(host='0.0.0.0', port=api_port)
