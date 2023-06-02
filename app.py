@@ -12,18 +12,18 @@ from google.cloud import storage
 import mysql.connector
 from blinker import signal
 from flask_socketio import SocketIO, emit, Namespace
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 from redis import Redis
 
-env_vars = dotenv_values(".env")
-sql_host = env_vars.get("SQL_HOST")
-sql_database = env_vars.get("SQL_DATABASE")
-sql_user = env_vars.get("SQL_USER")
-sql_password = env_vars.get("SQL_PW")
-socket_io_key = env_vars.get("SOCKETIO_KEY")
-redis_host = env_vars.get("REDIS_HOST")
-redis_port = env_vars.get("REDIS_PORT")
-redis_pw = env_vars.get("REDIS_PW")
+load_dotenv()
+sql_host = os.getenv("SQL_HOST")
+sql_database = os.getenv("SQL_DATABASE")
+sql_user = os.getenv("SQL_USER")
+sql_password = os.getenv("SQL_PW")
+socket_io_key = os.getenv("SOCKETIO_KEY")
+redis_host = os.getenv("REDIS_HOST")
+redis_port = os.getenv("REDIS_PORT")
+redis_pw = os.getenv("REDIS_PW")
 
 RQ_FINISHED_STATUS = 'finished'
 RQ_FAILED_STATUS = 'failed'
@@ -266,4 +266,4 @@ def run(details):
 sql_insertion_signal.connect(run)
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host='0.0.0.0', port=5050)

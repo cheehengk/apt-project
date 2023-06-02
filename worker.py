@@ -1,12 +1,14 @@
+import os
+
 from redis import Redis
 from rq import Worker, Queue, Connection
 from flask_app.src.scripter import main
-from dotenv import dotenv_values
+from dotenv import load_dotenv
 
-env_vars = dotenv_values(".env")
-redis_host = env_vars.get("REDIS_HOST")
-redis_port = env_vars.get("REDIS_PORT")
-redis_pw = env_vars.get("REDIS_PW")
+load_dotenv()
+redis_host = os.getenv("REDIS_HOST")
+redis_port = os.getenv("REDIS_PORT")
+redis_pw = os.getenv("REDIS_PW")
 
 listen = ['default']
 
