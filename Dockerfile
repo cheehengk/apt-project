@@ -31,4 +31,4 @@ RUN mkdir -p flask_app/src/temp_assets/Texts
 # Copy restriction policy to ImageMagick
 COPY policy.xml /etc/ImageMagick-6/
 
-CMD python worker.py
+CMD python app.py
