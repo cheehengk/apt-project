@@ -26,5 +26,5 @@ jobs:
         uses: dokku/github-action@master
         with:
           git_push_flags: '--force'
-          git_remote_url: 'ssh://dokku@34.171.29.156:api-flask'
+          git_remote_url: 'ssh://dokku@34.171.29.156/api-flask'
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
