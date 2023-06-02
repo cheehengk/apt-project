@@ -15,8 +15,16 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan 34.171.29.156 >> ~/.ssh/known_hosts
+
       - name: Push to dokku
         uses: dokku/github-action@master
         with:
+          git_push_flags: '--force'
           git_remote_url: 'ssh://chee_heng_koh@34.171.29.156/api-flask'
           ssh_private_key: ${{ secrets.SSH_PRIVATE_KEY }}
